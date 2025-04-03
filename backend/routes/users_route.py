@@ -38,3 +38,9 @@ def user_update():
     elif request.method == "DELETE":
         mongo.db.users.delete_one({"_id": ObjectId(current_user_id)})
         return jsonify({"msg": "User deleted successfully"}), 204
+
+@users_bp.route("/sort", methods=["GET"])
+@jwt_required()
+def get_user_sort_by_score():
+    sorted_users = mongo.db.users.find().sort("score", -1)
+    return jsonify({"users": sorted_users}), 200
