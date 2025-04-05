@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from extensions import mongo, bcrypt
 from bson import ObjectId   # type: ignore
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token
+from utils import copy_default_image
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -19,7 +20,17 @@ def register():
         return jsonify({"error": "User already exists"}), 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
-    user_id = mongo.db.users.insert_one({"username": username, "password": hashed_password, "score": 0}).inserted_id
+    user_id = mongo.db.users.insert_one(
+        {"username": username,
+         "password": hashed_password,
+         "score": 0}).inserted_id
+        
+    image_path = copy_default_image(user_id)
+    
+    mongo.db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"image_path": image_path}}
+        )
 
     return jsonify({"message": "User created successfully", "user_id": str(user_id)}), 201
 
@@ -35,10 +46,3 @@ def login():
 
     access_token = create_access_token(identity=str(user["_id"]))
     return jsonify({"token": access_token, "username": username}), 200
-
-@auth_bp.route("/hello", methods=["GET"])
-@jwt_required()
-def hello():
-    current_user_id = get_jwt_identity()
-    current_username = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
-    return jsonify({"message": f"Hello, world! User: {current_username['username']}"}), 200
