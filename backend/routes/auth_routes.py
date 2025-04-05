@@ -21,14 +21,24 @@ def register():
         return jsonify({"error": "User already exists"}), 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
-    user_id = mongo.db.users.insert_one({"username": username, "password": hashed_password, "score": 0}).inserted_id
+    user_id = mongo.db.users.insert_one(
+        {"username": username,
+         "password": hashed_password,
+         "score": 0}).inserted_id
     
-    profile_image_name = f"{user_id}_profile.png"
-    project_path = current_app.root_path
-    shutil.copy(os.path.join(project_path, "static", "default_profile_image.png"), os.path.join(project_path, "uploads", profile_image_name))
-
-    image_path = f"uploads/{profile_image_name}"
-    mongo.db.users.update_one({"_id": ObjectId(user_id)}, {"$set": {"image_path": image_path}})
+    new_filename = f"{user_id}_profile.png"
+    file_path = os.path.join("static", "default_profile_image.png")
+    save_path = os.path.join("uploads", new_filename)
+    
+    shutil.copy(
+        os.path.join(current_app.root_path, file_path),
+        os.path.join(current_app.root_path,save_path)
+        )
+    
+    mongo.db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"image_path": save_path}}
+        )
 
     return jsonify({"message": "User created successfully", "user_id": str(user_id)}), 201
 
