@@ -1,4 +1,5 @@
 import os
+import shutil
 from flask import Blueprint, request, jsonify, current_app
 from extensions import mongo, bcrypt
 from bson import ObjectId   # type: ignore
@@ -48,20 +49,43 @@ def get_user_sort_by_score():
     sorted_users = mongo.db.users.find().sort("score", -1)
     return jsonify({"users": sorted_users}), 200
 
-@users_bp.route("/image", methods=["PUT"])
+@users_bp.route("/image", methods=["PUT", "DELETE"])
 @jwt_required()
 def update_user_image():
     current_user_id = get_jwt_identity()
 
-    if "file" not in request.files:
-        return jsonify({"error": "No file part"}), 400
+    if request.method == "PUT":
+        
+        if "file" not in request.files:
+            return jsonify({"error": "No file part"}), 400
 
-    file = request.files["file"]
-    if file.filename == "":
-        return jsonify({"error": "No selected file"}), 400
+        file = request.files["file"]
+        if file.filename == "":
+            return jsonify({"error": "No selected file"}), 400
 
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
+        
+            old_image_path = user.get("image_path")
+            if old_image_path:
+                full_old_path = os.path.join(current_app.root_path, old_image_path)
+                if os.path.exists(full_old_path):
+                    os.remove(full_old_path)
+
+            extension = filename.rsplit(".", 1)[1].lower()
+            new_filename = f"{current_user_id}_profile.{extension}"
+            save_path = os.path.join("uploads", new_filename)
+            file.save(os.path.join(current_app.root_path, save_path))
+
+            mongo.db.users.update_one({"_id": ObjectId(current_user_id)}, {"$set": {"image_path": save_path}})
+
+            return jsonify({"msg": "Image updated successfully"}), 200
+
+        return jsonify({"error": "Invalid file"}), 400
+    
+    elif request.method == "DELETE":
+        
         user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
     
         old_image_path = user.get("image_path")
@@ -69,15 +93,13 @@ def update_user_image():
             full_old_path = os.path.join(current_app.root_path, old_image_path)
             if os.path.exists(full_old_path):
                 os.remove(full_old_path)
+        
+        profile_image_name = f"{current_user_id}_profile.png"
+        project_path = current_app.root_path
+        shutil.copy(os.path.join(project_path, "static", "default_profile_image.png"), os.path.join(project_path, "uploads", profile_image_name))
 
-        extension = filename.rsplit(".", 1)[1].lower()
-        new_filename = f"{current_user_id}_profile.{extension}"
-        save_path = os.path.join("uploads", new_filename)
-        file.save(os.path.join(current_app.root_path, save_path))
+        image_path = f"uploads/{profile_image_name}"
+        
+        mongo.db.users.update_one({"_id": ObjectId(current_user_id)}, {"$set": {"image_path": image_path}})
 
-        mongo.db.users.update_one({"_id": ObjectId(current_user_id)}, {"$set": {"image_path": save_path}})
-
-        return jsonify({"msg": "Image updated successfully"}), 200
-
-    return jsonify({"error": "Invalid file"}), 400
-    
+        return jsonify({"msg": "Image deleted successfully"}), 200
