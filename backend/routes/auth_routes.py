@@ -1,4 +1,6 @@
-from flask import Blueprint, request, jsonify
+import os
+import shutil
+from flask import Blueprint, request, jsonify, send_from_directory, current_app
 from extensions import mongo, bcrypt
 from bson import ObjectId   # type: ignore
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
@@ -20,6 +22,13 @@ def register():
 
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
     user_id = mongo.db.users.insert_one({"username": username, "password": hashed_password, "score": 0}).inserted_id
+    
+    profile_image_name = f"{user_id}_profile.png"
+    project_path = current_app.root_path
+    shutil.copy(os.path.join(project_path, "static", "default_profile_image.png"), os.path.join(project_path, "uploads", profile_image_name))
+
+    image_path = f"uploads/{profile_image_name}"
+    mongo.db.users.update_one({"_id": ObjectId(user_id)}, {"$set": {"image_path": image_path}})
 
     return jsonify({"message": "User created successfully", "user_id": str(user_id)}), 201
 
@@ -40,5 +49,5 @@ def login():
 @jwt_required()
 def hello():
     current_user_id = get_jwt_identity()
-    current_username = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
-    return jsonify({"message": f"Hello, world! User: {current_username['username']}"}), 200
+    current_user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
+    return send_from_directory("", current_user["image_path"])
