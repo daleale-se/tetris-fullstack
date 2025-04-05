@@ -1,5 +1,6 @@
 import os
 import shutil
+from PIL import Image
 from flask import Blueprint, request, jsonify, current_app
 from extensions import mongo, bcrypt
 from bson import ObjectId   # type: ignore
@@ -76,9 +77,17 @@ def update_user_image():
             extension = filename.rsplit(".", 1)[1].lower()
             new_filename = f"{current_user_id}_profile.{extension}"
             save_path = os.path.join("uploads", new_filename)
-            file.save(os.path.join(current_app.root_path, save_path))
+            file_path = os.path.join(current_app.root_path, save_path)
+            
+            img = Image.open(file)
+            img = img.convert("RGB") 
+            img.thumbnail((300, 300))
+            img.save(file_path, "JPEG", quality=75, optimize=True)
 
-            mongo.db.users.update_one({"_id": ObjectId(current_user_id)}, {"$set": {"image_path": save_path}})
+            mongo.db.users.update_one(
+                {"_id": ObjectId(current_user_id)},
+                {"$set": {"image_path": save_path}}
+            )
 
             return jsonify({"msg": "Image updated successfully"}), 200
 
