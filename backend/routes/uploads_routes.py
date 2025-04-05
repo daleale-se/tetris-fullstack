@@ -1,10 +1,9 @@
 import os
-import shutil
 from PIL import Image
 from flask import Blueprint, current_app, jsonify, request, send_from_directory
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from werkzeug.utils import secure_filename
-from utils import remove_old_path, allowed_file
+from utils import remove_old_path, allowed_file, copy_default_image
 from extensions import mongo
 from bson import ObjectId   # type: ignore
 
@@ -53,25 +52,17 @@ def update_user_image():
 @uploads_bp.route("/", methods=["DELETE"])
 @jwt_required()
 def remove_user_image():
-    current_user_id = get_jwt_identity()
+    user_id = get_jwt_identity()
     
-    user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
+    user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
 
     path = user.get("image_path").split("/")
     remove_old_path(os.path.join("uploads", path[-1]))
     
-    new_filename = f"{current_user_id}_profile.png"
-    file_path = os.path.join("static", "default_profile_image.png")
-    save_path = os.path.join("uploads", new_filename)
-    shutil.copy(
-        os.path.join(current_app.root_path, file_path),
-        os.path.join(current_app.root_path, save_path)
-        )
-    
-    image_path = os.path.join(request.host_url, save_path)
+    image_path = copy_default_image(user_id)
     
     mongo.db.users.update_one(
-        {"_id": ObjectId(current_user_id)},
+        {"_id": ObjectId(user_id)},
         {"$set": {"image_path": image_path}}
         )
 

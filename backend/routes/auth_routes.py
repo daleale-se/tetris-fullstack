@@ -1,9 +1,8 @@
-import os
-import shutil
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
 from extensions import mongo, bcrypt
 from bson import ObjectId   # type: ignore
 from flask_jwt_extended import create_access_token
+from utils import copy_default_image
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -25,16 +24,8 @@ def register():
         {"username": username,
          "password": hashed_password,
          "score": 0}).inserted_id
-    
-    new_filename = f"{user_id}_profile.png"
-    file_path = os.path.join("static", "default_profile_image.png")
-    save_path = os.path.join("uploads", new_filename)
-    shutil.copy(
-        os.path.join(current_app.root_path, file_path),
-        os.path.join(current_app.root_path, save_path)
-        )
-    
-    image_path = os.path.join(request.host_url, save_path)
+        
+    image_path = copy_default_image(user_id)
     
     mongo.db.users.update_one(
         {"_id": ObjectId(user_id)},
