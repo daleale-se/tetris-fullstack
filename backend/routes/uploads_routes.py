@@ -3,13 +3,13 @@ from PIL import Image
 from flask import Blueprint, current_app, jsonify, request, send_from_directory
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from werkzeug.utils import secure_filename
-from utils import remove_old_path, allowed_file, copy_default_image
+from utils import remove_old_file, allowed_file, copy_default_image
 from extensions import mongo
 from bson import ObjectId   # type: ignore
 
 uploads_bp = Blueprint("uploads", __name__)
 
-@uploads_bp.route("/", methods=["PUT"])
+@uploads_bp.route("", methods=["PUT"])
 @jwt_required()
 def update_user_image():
     current_user_id = get_jwt_identity()
@@ -25,8 +25,7 @@ def update_user_image():
         filename = secure_filename(img_file.filename)
         user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
 
-        path = user.get("image_path").split("/")
-        remove_old_path(os.path.join("uploads", path[-1]))
+        remove_old_file(user.get("image_path"))
 
         extension = filename.rsplit(".", 1)[1].lower()
         new_filename = f"{current_user_id}_profile.{extension}"
@@ -45,19 +44,18 @@ def update_user_image():
             {"$set": {"image_path": image_path}}
             )
 
-        return jsonify({"msg": "Image updated successfully"}), 200
+        return jsonify({"message": "Image updated successfully"}), 200
 
     return jsonify({"error": "Invalid file"}), 400
 
-@uploads_bp.route("/", methods=["DELETE"])
+@uploads_bp.route("", methods=["DELETE"])
 @jwt_required()
 def remove_user_image():
     user_id = get_jwt_identity()
     
     user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
 
-    path = user.get("image_path").split("/")
-    remove_old_path(os.path.join("uploads", path[-1]))
+    remove_old_file(user.get("image_path"))
     
     image_path = copy_default_image(user_id)
     
@@ -66,7 +64,7 @@ def remove_user_image():
         {"$set": {"image_path": image_path}}
         )
 
-    return jsonify({"msg": "Image deleted successfully"}), 200
+    return jsonify({"message": "Image deleted successfully"}), 200
 
 @uploads_bp.route('/<filename>', methods=["GET"])
 def uploaded_file(filename):
