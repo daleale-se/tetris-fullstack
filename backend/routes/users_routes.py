@@ -62,3 +62,10 @@ def remove_user():
 def get_users_sort_by_score():
     sorted_users = mongo.db.users.find().sort("score", -1)
     return jsonify({"users": sorted_users}), 200
+
+@users_bp.route("", methods=["GET"])
+@jwt_required()
+def get_user_data():
+    current_user_id = get_jwt_identity()
+    user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
+    return jsonify({"user": user}), 200
