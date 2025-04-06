@@ -1,4 +1,6 @@
+import os
 from flask import Blueprint, request, jsonify
+from utils import remove_old_path
 from extensions import mongo, bcrypt
 from bson import ObjectId   # type: ignore
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -39,8 +41,17 @@ def update_user():
 def remove_user():
     current_user_id = get_jwt_identity()
     
+    user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
+    
+    if not user:
+        return jsonify({"msg": "User was not found"}), 200
+    
+    path = user.get("image_path").split("/")
+    remove_old_path(os.path.join("uploads", path[-1]))
+    
     mongo.db.users.delete_one({"_id": ObjectId(current_user_id)})
-    return jsonify({"msg": "User deleted successfully"}), 204
+    
+    return jsonify({"msg": "User deleted successfully"}), 200
 
 @users_bp.route("/sort", methods=["GET"])
 @jwt_required()
