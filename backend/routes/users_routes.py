@@ -1,13 +1,12 @@
-import os
 from flask import Blueprint, request, jsonify
-from utils import remove_old_path
+from utils import remove_old_file
 from extensions import mongo, bcrypt
 from bson import ObjectId   # type: ignore
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 users_bp = Blueprint("users", __name__)
 
-@users_bp.route("/", methods=["PUT"])
+@users_bp.route("", methods=["PUT"])
 @jwt_required()
 def update_user():
     current_user_id = get_jwt_identity()
@@ -26,17 +25,23 @@ def update_user():
 
     if new_username:
         updates["username"] = new_username
-    elif new_password:
+    
+    if new_password:
         hashed_password = bcrypt.generate_password_hash(new_password).decode("utf-8")
         updates["password"] = hashed_password
-    else:
+        
+    if new_score:
         updates["score"] = new_score
         
+    message = []
+    for key in updates:
+        message.append(f"{key.capitalize()} updated successfully")
+
     mongo.db.users.update_one({"_id": ObjectId(current_user_id)}, {"$set": updates})
     
-    return jsonify({"msg": "User updated successfully"}), 200
+    return jsonify({"message": message}), 200
 
-@users_bp.route("/", methods=["DELETE"])
+@users_bp.route("", methods=["DELETE"])
 @jwt_required()
 def remove_user():
     current_user_id = get_jwt_identity()
@@ -44,14 +49,13 @@ def remove_user():
     user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
     
     if not user:
-        return jsonify({"msg": "User was not found"}), 200
+        return jsonify({"error": "User not found"}), 200
     
-    path = user.get("image_path").split("/")
-    remove_old_path(os.path.join("uploads", path[-1]))
+    remove_old_file(user.get("image_path"))
     
     mongo.db.users.delete_one({"_id": ObjectId(current_user_id)})
     
-    return jsonify({"msg": "User deleted successfully"}), 200
+    return jsonify({"message": "User deleted successfully"}), 200
 
 @users_bp.route("/sort", methods=["GET"])
 @jwt_required()
