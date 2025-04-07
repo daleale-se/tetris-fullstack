@@ -26,3 +26,5 @@ def create_app(testing=False):
 		app.run(debug=True)
 	
 	return app
+
+create_app()
