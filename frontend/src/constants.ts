@@ -1,4 +1,4 @@
-import { UserInfoType, UserFormType, UserDataType } from "./types"
+import { UserInfoType, UserFormType, UserInputType } from "./types"
 
 export const INITIAL_USER_INFO: UserInfoType = {
     username: "",
@@ -10,7 +10,7 @@ export const INITIAL_USER_FORM: UserFormType = {
     isOpen: false
 }
 
-export const INITIAL_USER_DATA: UserDataType = {
+export const INITIAL_USER_DATA: UserInputType = {
     username: "",
     password: ""
 }

@@ -3,9 +3,9 @@ export type UserInfoType = {
     token: string
 }
 
-export type RegisterUserType = (data: UserDataType) => void
+export type RegisterUserType = (data: UserInputType) => void
 
-export type LoginUserType = (data: UserDataType, setUserInfo: React.Dispatch<React.SetStateAction<UserInfoType>>) => void
+export type LoginUserType = (data: UserInputType, setUserInfo: React.Dispatch<React.SetStateAction<UserInfoType>>) => void
 
 
 export type UserFormType = {
@@ -19,8 +19,13 @@ export type AuthFormType = {
     userForm: UserFormType
 }
 
-export type UserDataType = {
+export type UserInputType = {
     username: string,
     password: string
 }
 
+export type UserDataType = {
+  username: string,
+  score: number,
+  image_path: string
+}

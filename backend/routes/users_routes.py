@@ -58,7 +58,6 @@ def remove_user():
     return jsonify({"message": "User deleted successfully"}), 200
 
 @users_bp.route("/sort", methods=["GET"])
-@jwt_required()
 def get_users_sort_by_score():
     sorted_users = mongo.db.users.find().sort("score", -1)
     return jsonify({"users": sorted_users}), 200

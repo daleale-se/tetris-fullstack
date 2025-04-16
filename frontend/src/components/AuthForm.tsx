@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import {registerUser, loginUser} from "../services/user"
+import {registerUser, loginUser} from "../services/auth"
 import { AuthFormType } from "../types";
 import { INITIAL_USER_DATA, INITIAL_USER_INFO } from "../constants";
 
