@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import AuthForm from "../components/AuthForm"
+import { INITIAL_USER_FORM, INITIAL_USER_INFO } from "../constants"
 
 const Home = () => {
 
-    const [username, setUsername] = useState("")
-    const [token, setToken] = useState("")
-    const [modalIsOpen, setModalIsOpen] = useState(false)
-    const [mode, setMode] = useState("")
+    const [userInfo, setUserInfo] = useState(INITIAL_USER_INFO)
+    const [userForm, setUserForm] = useState(INITIAL_USER_FORM)
 
     useEffect(() => {
 
@@ -15,27 +14,31 @@ const Home = () => {
         const sessionToken = sessionStorage.getItem("token")
 
         if (sessionUsername && sessionToken) {
-            setUsername(sessionUsername)
-            setToken(sessionToken)
-            console.log(token)
+            setUserInfo({
+                username: sessionUsername,
+                token: sessionToken
+            })
         }
 
     }, [])
 
     const handleRegisterButton = () => {
-        setMode("register")
-        setModalIsOpen(true)
+        setUserForm({
+            mode: "register",
+            isOpen: true,
+        })
     }
 
     const handleLoginButton = () => {
-        setMode("login")
-        setModalIsOpen(true)
+        setUserForm({
+            mode: "login",
+            isOpen: true,
+        })
     }
 
     const handleLogoutButton = () => {
         sessionStorage.clear()
-        setUsername("")
-        setToken("")
+        setUserInfo(INITIAL_USER_INFO)
     }
 
   return (
@@ -44,10 +47,10 @@ const Home = () => {
         <br />
         <Link to="/dashboard">dashboard</Link>
         <br />
-        {username
+        {userInfo.username
         ?
         <div>
-            <Link to="/profile">{username}</Link>
+            <Link to="/profile">{userInfo.username}</Link>
             <button onClick={handleLogoutButton}>logout</button>
         </div>
         : <div>
@@ -55,7 +58,7 @@ const Home = () => {
             <button onClick={handleLoginButton}>login</button>
         </div>
         }
-        {modalIsOpen ? <AuthForm setModalIsOpen={setModalIsOpen} mode={mode} setMode={setMode} setUsername={setUsername} setToken={setToken}/> : null}
+        {userForm.isOpen ? <AuthForm setUserInfo={setUserInfo} setUserForm={setUserForm} userForm={userForm}/> : null}
     </div>
   )
 }

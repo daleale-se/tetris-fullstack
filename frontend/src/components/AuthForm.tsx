@@ -1,84 +1,52 @@
-import { useState } from "react"
-
-const registerUser = (data) => {
-    fetch(`http://localhost:5000/auth/register`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-type": "application/json; charset=UTF-8"
-        }
-    })
-    .then(res => res.json())
-    .then(data => console.log(data))
-}
-
-const loginUser = (data, setUsername, setToken) => {
-    fetch(`http://localhost:5000/auth/login`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-type": "application/json; charset=UTF-8"
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        setUsername(data["username"])
-        setToken(data["token"])
-        sessionStorage.setItem("username", data["username"])
-        sessionStorage.setItem("token", data["token"])
-    })
-}
+import { FC, useState } from "react";
+import {registerUser, loginUser} from "../services/user"
+import { AuthFormType } from "../types";
+import { INITIAL_USER_DATA, INITIAL_USER_INFO } from "../constants";
 
 
-const AuthForm = ({setModalIsOpen, mode, setMode, setUsername, setToken}) => {
+const AuthForm: FC<AuthFormType> = ({setUserInfo, setUserForm, userForm}) => {
 
-    const [data, setData] = useState({
-        "username":"",
-        "password":""
-    })
+    const [data, setData] = useState(INITIAL_USER_DATA)
 
-    const handleInput = (e) => {
+    const handleInput = (e:React.ChangeEvent<HTMLInputElement>) => {
         const key = e.target.name
+
         setData(prevData => ({
             ...prevData,
             [key]: e.target.value
         }))
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault()
 
-        if (mode == "register") {
-            registerUser(data)
-        } else {
-            loginUser(data, setUsername, setToken)
+        const actions = {
+            register: () => registerUser(data),
+            login: () => loginUser(data, setUserInfo),
         }
+    
+        actions[userForm.mode as 'register' | 'login']()
 
-        setData({
-            "username":"",
-            "password":""
-        })
-
-        setMode("")
-        setModalIsOpen(false)
+        setData(INITIAL_USER_DATA)
+        setUserInfo(INITIAL_USER_INFO)
     }
 
   return (
     <div>
-        <button onClick={() => setModalIsOpen(false)}>close</button>
+        <button onClick={() => setUserForm({...userForm, ["isOpen"] : userForm.isOpen!})}>close</button>
         <form>
-            <h2>{mode}</h2>
+            <h2>{userForm.mode}</h2>
 
             <label htmlFor="username">
                 <p>username:</p>
-                <input value={data["username"]} type="text" name="username" onChange={e => handleInput(e)}/>
+                <input value={data["username"]} type="text" name="username" onChange={handleInput} required/>
             </label>
             <label htmlFor="password">
                 <p>password:</p>
-                <input value={data["password"]} type="password" name="password" onChange={e => handleInput(e)}/>
+                <input value={data["password"]} type="password" name="password" onChange={handleInput} required/>
             </label>
 
-            <button type="submit" onClick={handleSubmit}>{mode}</button>
+            <button type="submit" onClick={handleSubmit}>{userForm.mode}</button>
         </form>
     </div>
   )
