@@ -25,7 +25,7 @@ const Profile = () => {
       <img src={userData?.image_path} alt={userData?.username+"_img"} />
       <h2>{userData?.username} <button>change username</button></h2>
       <p>Level: 2</p>
-      <p>XP: 35</p>
+      <p>XP: 30/100</p>
       <p>High score: {userData?.score}</p>
       <p>Average score: 1000</p>
       <p>Total lines cleared: 34</p>

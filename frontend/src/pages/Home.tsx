@@ -47,18 +47,25 @@ const Home = () => {
         <br />
         <Link to="/dashboard">dashboard</Link>
         <br />
-        {userInfo.username
-        ?
-        <div>
-            <Link to="/profile">{userInfo.username}</Link>
-            <button onClick={handleLogoutButton}>logout</button>
-        </div>
-        : <div>
-            <button onClick={handleRegisterButton}>register</button>
-            <button onClick={handleLoginButton}>login</button>
-        </div>
+        {
+            userInfo.username
+            ? <div>
+                <Link to="/profile">{userInfo.username}</Link>
+                <button onClick={handleLogoutButton}>logout</button>
+            </div>
+            : <div>
+                <button onClick={handleRegisterButton}>register</button>
+                <button onClick={handleLoginButton}>login</button>
+            </div>
         }
-        {userForm.isOpen ? <AuthForm setUserInfo={setUserInfo} setUserForm={setUserForm} userForm={userForm}/> : null}
+        {
+            userForm.isOpen 
+            ? <AuthForm 
+                setUserInfo={setUserInfo} 
+                setUserForm={setUserForm} 
+                userForm={userForm}/> 
+            : null
+        }
     </div>
   )
 }
