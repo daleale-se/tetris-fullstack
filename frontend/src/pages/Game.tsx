@@ -1,7 +1,11 @@
 import PiecePreview from "../components/PiecePreview"
-import TetrisCanvas from "../components/TetrisCanvas"
+import TetrisCanvas from "../components/TetrisBoard"
+import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
+
+  const {currentPiece, nextPieces, useNextPiece, moveLeft, moveRight, rotate} = useTetrisGame()
+
   return (
     <div>
       
@@ -28,6 +32,15 @@ const Game = () => {
           <button>home</button>
           <br />
           <button>new game</button>
+        </div>
+
+        <div>
+          <button onClick={() => console.log(currentPiece)}>show current piece</button>
+          <button onClick={() => console.log(nextPieces)}>show next pieces</button>
+          <button onClick={useNextPiece}>use next piece</button>
+          <button onClick={moveLeft}>move left</button>
+          <button onClick={moveRight}>move right</button>
+          <button onClick={rotate}>rotate</button>
         </div>
 
     </div>
