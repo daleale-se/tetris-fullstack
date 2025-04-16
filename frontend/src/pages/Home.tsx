@@ -10,13 +10,13 @@ const Home = () => {
 
     useEffect(() => {
 
-        const sessionUsername = sessionStorage.getItem("username")
-        const sessionToken = sessionStorage.getItem("token")
+        const username = sessionStorage.getItem("username")
+        const token = sessionStorage.getItem("token")
 
-        if (sessionUsername && sessionToken) {
+        if (username && token) {
             setUserInfo({
-                username: sessionUsername,
-                token: sessionToken
+                username,
+                token,
             })
         }
 
