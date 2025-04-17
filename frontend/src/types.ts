@@ -29,3 +29,13 @@ export type UserDataType = {
   score: number,
   image_path: string
 }
+
+export type PieceBagType = 'I'|'O'|'J'|'L'|'T'|'S'|'Z'
+
+export type PieceType = {
+    shape: string,
+    position: {
+        x: number,
+        y: number
+    }
+}

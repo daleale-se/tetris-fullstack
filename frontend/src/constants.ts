@@ -1,19 +1,19 @@
-import { UserInfoType, UserFormType, UserInputType } from "./types"
+import { UserInfoType, UserFormType, UserInputType, PieceBagType } from "./types"
 
 export const BOARD_WIDTH = 10
-export const BOARD_HEIGHT = 20
+export const BOARD_HEIGHT = 10
 
-export const EMPTY_SPACE = " "
-export const PIECES_BAG = ['I','O','L','J','T','S','Z']
+export const EMPTY_SPACE = "_"
+export const PIECES_BAG: PieceBagType[] = ['I','O','L','J','T','S','Z']
 
 export const PIECES_SHAPES = {
     I: "IIII",
     O: "OO\nOO",
-    L: "  L\nLLL",
-    J: "JJJ\n  J",
-    T: "TTT\n T ",
-    S: " SS\nSS ",
-    Z: "ZZ \n ZZ"
+    L: "__L\nLLL",
+    J: "JJJ\n__J",
+    T: "TTT\n_T_",
+    S: "_SS\nSS_",
+    Z: "ZZ_\n_ZZ"
 }
 
 export const INITIAL_USER_INFO: UserInfoType = {
