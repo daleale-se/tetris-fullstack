@@ -4,12 +4,12 @@ import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
 
-  const {currentPiece, nextPieces, useNextPiece, moveLeft, moveRight, rotate, drop, printBoard, updatePiece} = useTetrisGame()
+  const {inGameBoard, canDrop, nextPiece, moveLeft, moveRight, rotate, drop} = useTetrisGame()
 
   return (
     <div>
-      
-        <TetrisCanvas/>	
+
+        <TetrisCanvas inGameBoard={inGameBoard} drop={drop} canDrop={canDrop} nextPiece={nextPiece} />
 
         <div className="user-info">
           <p>
@@ -35,14 +35,8 @@ const Game = () => {
         </div>
 
         <div>
-          {/* <button onClick={() => console.log(currentPiece)}>show current piece</button>
-          <button onClick={() => console.log(nextPieces)}>show next pieces</button> */}
-          <button onClick={printBoard}>show board</button>
-          <button onClick={updatePiece}>update piece</button>
-          <button onClick={useNextPiece}>use next piece</button>
           <button onClick={moveLeft}>move left</button>
           <button onClick={moveRight}>move right</button>
-          <button onClick={drop}>drop</button>
           <button onClick={rotate}>rotate</button>
         </div>
 

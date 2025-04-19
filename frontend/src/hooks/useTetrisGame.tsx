@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createEmptyBoard } from "../utils/createEmptyBoard";
 import { BOARD_WIDTH, EMPTY_SPACE, PIECES_BAG, PIECES_SHAPES } from "../constants";
 import { PieceBagType, PieceType } from "../types";
@@ -27,8 +27,6 @@ const initialPieceState = (name: PieceBagType): PieceType => {
 const randomPiece = (): PieceBagType => PIECES_BAG[Math.floor(Math.random()*PIECES_BAG.length)]
 
 const shapeToTwoD = (shape: string) => shape.split("\n").map(row => row.split(""))
-
-const boardToString = (board: string[][]): string => board.map(row => row.join("")).join("\n");
 
 const insertPieceToBoard = (currentPiece:PieceType, board:string[][]) => {
     const newBoard = board.map(innerArray => [...innerArray]);
@@ -179,14 +177,10 @@ export function useTetrisGame() {
     // Current active piece and next pieces
     const [currentPiece, setCurrentPiece] = useState<PieceType>(initialPieceState(randomPiece()));
     const [nextPieces, setNextPieces] = useState<PieceBagType[]>([randomPiece(), randomPiece()]);
-    
-    // Game loop timing reference
-    // const lastTickRef = useRef(Date.now());
-    // const requestIdRef = useRef(null);
-    
+        
     // Game logic functions...
     
-    const useNextPiece = () => {
+    const nextPiece = () => {
 
         const newBoard = insertPieceToBoard(currentPiece, board)
         setBoard(newBoard)
@@ -252,45 +246,36 @@ export function useTetrisGame() {
     }
     
     const drop = () => {
-
-        if (!collideOnTheBottom(currentPiece, board)) {
-            setCurrentPiece(prevPiece => ({
-                ...prevPiece,
-                position: {
-                  ...prevPiece?.position, 
-                  y: (prevPiece?.position.y ?? 0) + 1, 
-                },
-            }));        
-        }
-
+        setCurrentPiece(prevPiece => ({
+            ...prevPiece,
+            position: {
+                ...prevPiece?.position, 
+                y: (prevPiece?.position.y ?? 0) + 1, 
+            },
+        }));
     }
 
-    const printBoard = () => {
-        const {shape, position} = currentPiece
-        console.log(shape);
-        console.log(position.x, position.y);
-        console.log(boardToString(inGameBoard));
+    const canDrop = () => {
+        return !collideOnTheBottom(currentPiece, board)
     }
 
-    const updatePiece = () => {
-        const newBoard = insertPieceToBoard(currentPiece, board)
-        setInGameBoard(newBoard)
+    useEffect(() => {
+        const newBoard = insertPieceToBoard(currentPiece, board);
+        setInGameBoard(newBoard);
 
-        console.log(boardToString(newBoard));
-    }
+      }, [currentPiece, board]);
 
     return {
       gameState,
-      board,
+      inGameBoard,
       currentPiece,
       nextPieces,
       moveLeft,
       moveRight,
       rotate,
-      useNextPiece,
+      nextPiece,
       drop,
-      printBoard,
-      updatePiece
+      canDrop
     //   hardDrop,
     //   startGame,
     //   pauseGame
