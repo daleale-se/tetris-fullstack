@@ -4,7 +4,7 @@ import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
 
-  const {inGameBoard, canDrop, nextPiece, moveLeft, moveRight, rotate, drop} = useTetrisGame()
+  const {inGameBoard, drop, canDrop, nextPiece, moveLeft, moveRight, rotate, hardDrop} = useTetrisGame()
 
   return (
     <div>
@@ -38,6 +38,7 @@ const Game = () => {
           <button onClick={moveLeft}>move left</button>
           <button onClick={moveRight}>move right</button>
           <button onClick={rotate}>rotate</button>
+          <button onClick={hardDrop}>hard drop</button>
         </div>
 
     </div>

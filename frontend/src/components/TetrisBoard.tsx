@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { drawBoard } from "../utils/drawBoard";
+import { DROP_TICK_MS } from "../constants";
 
 const TetrisBoard = ({inGameBoard, drop, canDrop, nextPiece}) => {
   
@@ -15,7 +16,7 @@ const TetrisBoard = ({inGameBoard, drop, canDrop, nextPiece}) => {
         nextPiece()
       }
 
-    }, 500)
+    }, DROP_TICK_MS)
 
     return () => clearInterval(gameLoop)
 

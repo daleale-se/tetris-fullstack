@@ -28,10 +28,10 @@ const randomPiece = (): PieceBagType => PIECES_BAG[Math.floor(Math.random()*PIEC
 
 const shapeToTwoD = (shape: string) => shape.split("\n").map(row => row.split(""))
 
-const insertPieceToBoard = (currentPiece:PieceType, board:string[][]) => {
+const insertPieceToBoard = (piece:PieceType, board:string[][]) => {
     const newBoard = board.map(innerArray => [...innerArray]);
-    const shape = shapeToTwoD(currentPiece.shape)
-    const pos = currentPiece.position
+    const shape = shapeToTwoD(piece.shape)
+    const pos = piece.position
 
     for (let i = 0; i < shape.length; ++i) {
         if (pos.y - i >= 0) {
@@ -48,10 +48,10 @@ const insertPieceToBoard = (currentPiece:PieceType, board:string[][]) => {
     return newBoard;
 }
 
-const collideOnTheRight = (currentPiece:PieceType, board:string[][]) => {
+const collideOnTheRight = (piece:PieceType, board:string[][]) => {
     const newBoard = board.map(innerArray => [...innerArray]);
-    const shape = shapeToTwoD(currentPiece.shape)
-    const pos = currentPiece.position
+    const shape = shapeToTwoD(piece.shape)
+    const pos = piece.position
 
     if (pos.x + shape[0].length > newBoard[0].length - 1){
         return true;
@@ -73,10 +73,10 @@ const collideOnTheRight = (currentPiece:PieceType, board:string[][]) => {
     return false;
 }
 
-const collideOnTheLeft = (currentPiece:PieceType, board:string[][]) => {
+const collideOnTheLeft = (piece:PieceType, board:string[][]) => {
     const newBoard = board.map(innerArray => [...innerArray]);
-    const shape = shapeToTwoD(currentPiece.shape)
-    const pos = currentPiece.position
+    const shape = shapeToTwoD(piece.shape)
+    const pos = piece.position
 
     if (pos.x - 1 < 0){
         return true;
@@ -99,10 +99,10 @@ const collideOnTheLeft = (currentPiece:PieceType, board:string[][]) => {
 
 }
 
-const collideOnTheBottom = (currentPiece:PieceType, board:string[][]) => {
+const collideOnTheBottom = (piece:PieceType, board:string[][]) => {
     const newBoard = board.map(innerArray => [...innerArray]);
-    const shape = shapeToTwoD(currentPiece.shape)
-    const pos = currentPiece.position
+    const shape = shapeToTwoD(piece.shape)
+    const pos = piece.position
 
     if (pos.y + 1 >= newBoard.length) {
         return true;
@@ -160,6 +160,7 @@ const getRightOverflow = (piece:PieceType, board:string[][]) => {
     return -1
 
 }
+
 
 export function useTetrisGame() {
     // Core game state
@@ -259,6 +260,23 @@ export function useTetrisGame() {
         return !collideOnTheBottom(currentPiece, board)
     }
 
+    const hardDrop = () => {
+
+        const newPiece = JSON.parse(JSON.stringify(currentPiece)) as PieceType;
+        const originalY = newPiece.position.y;
+
+        for (let i = 0; i < board.length; i++) {
+
+            newPiece.position.y = originalY + i;
+            if (collideOnTheBottom(newPiece, inGameBoard)) {
+                setCurrentPiece(newPiece)
+                return;
+            }
+
+        }
+    
+    }
+
     useEffect(() => {
         const newBoard = insertPieceToBoard(currentPiece, board);
         setInGameBoard(newBoard);
@@ -275,8 +293,8 @@ export function useTetrisGame() {
       rotate,
       nextPiece,
       drop,
-      canDrop
-    //   hardDrop,
+      canDrop,
+      hardDrop,
     //   startGame,
     //   pauseGame
     };

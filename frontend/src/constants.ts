@@ -18,6 +18,8 @@ export const PIECES_SHAPES = {
 
 export const BLOCK_SIZE = 20;
 
+export const DROP_TICK_MS = 600
+
 export const PIECES_COLORS = {
     _: "white",
     I: "green",
