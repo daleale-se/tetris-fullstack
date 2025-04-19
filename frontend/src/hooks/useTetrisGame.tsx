@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createEmptyBoard } from "../utils/createEmptyBoard";
-import { BOARD_HEIGHT, BOARD_WIDTH, EMPTY_SPACE, PIECES_BAG, PIECES_SHAPES } from "../constants";
+import { BOARD_WIDTH, EMPTY_SPACE, PIECES_BAG, PIECES_SHAPES } from "../constants";
 import { PieceBagType, PieceType } from "../types";
 
 const rotateShapeToLeft = (shape: string) => {
@@ -26,9 +26,9 @@ const initialPieceState = (name: PieceBagType): PieceType => {
 
 const randomPiece = (): PieceBagType => PIECES_BAG[Math.floor(Math.random()*PIECES_BAG.length)]
 
-const shapeToTwoD = (shape: string) => shape.split("\n").map(row => row.split(""))
+export const shapeToTwoD = (shape: string) => shape.split("\n").map(row => row.split(""))
 
-const insertPieceToBoard = (piece:PieceType, board:string[][]) => {
+export const insertPieceToBoard = (piece:PieceType, board:string[][]) => {
     const newBoard = board.map(innerArray => [...innerArray]);
     const shape = shapeToTwoD(piece.shape)
     const pos = piece.position
@@ -195,7 +195,7 @@ export function useTetrisGame() {
     
     // Board state (typically a 2D array)
     const [board, setBoard] = useState<string[][]>(createEmptyBoard());
-    const [inGameBoard, setInGameBoard] = useState<string[][]>(board);
+    // const [inGameBoard, setInGameBoard] = useState<string[][]>(board);
     
     // Current active piece and next pieces
     const [currentPiece, setCurrentPiece] = useState<PieceType>(initialPieceState(randomPiece()));
@@ -207,10 +207,7 @@ export function useTetrisGame() {
 
         // insert the piece before pass to another piece
         const newBoard = insertPieceToBoard(currentPiece, board)
-
-        const someBoard = removeCompletedRows(newBoard)
-
-        setBoard(someBoard)
+        setBoard(removeCompletedRows(newBoard))
 
         const newPiece = randomPiece()
         setCurrentPiece(initialPieceState(nextPieces[0]))
@@ -294,7 +291,7 @@ export function useTetrisGame() {
         for (let i = 0; i < board.length; i++) {
 
             newPiece.position.y = originalY + i;
-            if (collideOnTheBottom(newPiece, inGameBoard)) {
+            if (collideOnTheBottom(newPiece, board)) {
                 setCurrentPiece(newPiece)
                 return;
             }
@@ -303,16 +300,16 @@ export function useTetrisGame() {
     
     }
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        const newBoard = insertPieceToBoard(currentPiece, board);
-        setInGameBoard(newBoard);
+    //     const newBoard = insertPieceToBoard(currentPiece, board);
+    //     setInGameBoard(newBoard);
 
-    }, [currentPiece, board]);
+    // }, [currentPiece, board]);
 
     return {
       gameState,
-      inGameBoard,
+      board,
       currentPiece,
       nextPieces,
       moveLeft,

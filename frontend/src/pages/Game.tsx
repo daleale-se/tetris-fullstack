@@ -1,15 +1,40 @@
+import { useEffect } from "react"
 import PiecePreview from "../components/PiecePreview"
-import TetrisCanvas from "../components/TetrisBoard"
+import TetrisBoard from "../components/TetrisBoard"
 import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
 
-  const {inGameBoard, drop, canDrop, nextPiece, moveLeft, moveRight, rotate, hardDrop} = useTetrisGame()
+  const {board, currentPiece, drop, canDrop, nextPiece, moveLeft, moveRight, rotate, hardDrop} = useTetrisGame()
+
+  useEffect(() => {
+    const handleKeyDown = (e:KeyboardEvent) => {
+
+      if (e.repeat) return; 
+
+      if (currentPiece.isLocked) return; // Ignore controls if piece is locked
+
+      switch (e.key) {
+        case 'i': rotate(); break;
+        case 'k': hardDrop(); break;
+        case 'j': moveLeft(); break;
+        case 'l': moveRight(); break;
+        default: break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [rotate, hardDrop, moveLeft, moveRight]);
+
 
   return (
     <div>
 
-        <TetrisCanvas inGameBoard={inGameBoard} drop={drop} canDrop={canDrop} nextPiece={nextPiece}/>
+        <TetrisBoard board={board} currentPiece={currentPiece} drop={drop} canDrop={canDrop} nextPiece={nextPiece}/>
 
         <div className="user-info">
           <p>
@@ -32,13 +57,6 @@ const Game = () => {
           <button>home</button>
           <br />
           <button>new game</button>
-        </div>
-
-        <div>
-          <button onClick={moveLeft}>move left</button>
-          <button onClick={moveRight}>move right</button>
-          <button onClick={rotate}>rotate</button>
-          <button onClick={hardDrop}>hard drop</button>
         </div>
 
     </div>
