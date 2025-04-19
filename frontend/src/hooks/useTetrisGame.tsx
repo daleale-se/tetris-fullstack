@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createEmptyBoard } from "../utils/createEmptyBoard";
-import { BOARD_WIDTH, EMPTY_SPACE, PIECES_BAG, PIECES_SHAPES } from "../constants";
+import { BOARD_HEIGHT, BOARD_WIDTH, EMPTY_SPACE, PIECES_BAG, PIECES_SHAPES } from "../constants";
 import { PieceBagType, PieceType } from "../types";
 
 const rotateShapeToLeft = (shape: string) => {
@@ -161,6 +161,28 @@ const getRightOverflow = (piece:PieceType, board:string[][]) => {
 
 }
 
+const rowIsFilled = (row: string[]) => row.indexOf(EMPTY_SPACE) === -1;
+
+const emptyRow = () => new Array(BOARD_WIDTH).fill(EMPTY_SPACE);
+
+const removeCompletedRows = (board: string[][]) => {
+
+    const newBoard = JSON.parse(JSON.stringify(board)) as string[][];
+    let i = newBoard.length - 1;
+    
+    while (i >= 0) {
+        const row = newBoard[i]
+        if (rowIsFilled(row)) {
+            newBoard.splice(i, 1);
+            newBoard.unshift(emptyRow())
+        } else {
+            i--;
+        }
+    }
+
+    return newBoard
+    
+}
 
 export function useTetrisGame() {
     // Core game state
@@ -183,8 +205,12 @@ export function useTetrisGame() {
     
     const nextPiece = () => {
 
+        // insert the piece before pass to another piece
         const newBoard = insertPieceToBoard(currentPiece, board)
-        setBoard(newBoard)
+
+        const someBoard = removeCompletedRows(newBoard)
+
+        setBoard(someBoard)
 
         const newPiece = randomPiece()
         setCurrentPiece(initialPieceState(nextPieces[0]))
@@ -278,10 +304,11 @@ export function useTetrisGame() {
     }
 
     useEffect(() => {
+
         const newBoard = insertPieceToBoard(currentPiece, board);
         setInGameBoard(newBoard);
 
-      }, [currentPiece, board]);
+    }, [currentPiece, board]);
 
     return {
       gameState,
@@ -295,6 +322,7 @@ export function useTetrisGame() {
       drop,
       canDrop,
       hardDrop,
+      removeCompletedRows
     //   startGame,
     //   pauseGame
     };

@@ -9,7 +9,7 @@ const Game = () => {
   return (
     <div>
 
-        <TetrisCanvas inGameBoard={inGameBoard} drop={drop} canDrop={canDrop} nextPiece={nextPiece} />
+        <TetrisCanvas inGameBoard={inGameBoard} drop={drop} canDrop={canDrop} nextPiece={nextPiece}/>
 
         <div className="user-info">
           <p>
