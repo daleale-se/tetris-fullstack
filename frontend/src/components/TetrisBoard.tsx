@@ -2,7 +2,7 @@ import { useEffect, useRef} from "react";
 import { drawBoard } from "../utils/drawBoard";
 import { insertPieceToBoard } from "../utils/tetrisLogic";
 
-const TetrisBoard = ({ board, currentPiece }) => {
+const TetrisBoard = ({ board, currentPiece, moveLeft, moveRight, rotate, hardDrop}) => {
   const canvasRef = useRef(null);
 
   const mergedBoard = insertPieceToBoard(currentPiece, board);
@@ -13,6 +13,28 @@ const TetrisBoard = ({ board, currentPiece }) => {
     drawBoard(canvas, mergedBoard);
   
   }, [mergedBoard]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.repeat) return;
+  
+      switch (e.key) {
+        case 'i': rotate(); break;
+        case 'k': hardDrop(); break;
+        case 'j': moveLeft(); break;
+        case 'l': moveRight();break;
+        default: break;
+      }
+    };
+  
+    window.addEventListener('keydown', handleKeyDown);
+  
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+
+  }, [rotate, hardDrop, moveLeft, moveRight]);
+
   
   return <canvas ref={canvasRef} width={200} height={400} />;
 };

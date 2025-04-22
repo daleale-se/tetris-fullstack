@@ -1,4 +1,3 @@
-import { useEffect } from "react"
 import PiecePreview from "../components/PiecePreview"
 import TetrisBoard from "../components/TetrisBoard"
 import { useTetrisGame } from "../hooks/useTetrisGame"
@@ -6,33 +5,11 @@ import { useTetrisGame } from "../hooks/useTetrisGame"
 const Game = () => {
 
   const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop } = useTetrisGame()
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.repeat) return;
   
-      switch (e.key) {
-        case 'i': rotate(); break;
-        case 'k': hardDrop(); break;
-        case 'j': moveLeft(); break;
-        case 'l': moveRight();break;
-        default: break;
-      }
-    };
-  
-    window.addEventListener('keydown', handleKeyDown);
-  
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-    
-  }, [rotate, hardDrop, moveLeft, moveRight]);
-  
-
   return (
     <div>
 
-        <TetrisBoard board={board} currentPiece={currentPiece} />
+        <TetrisBoard board={board} currentPiece={currentPiece} moveLeft={moveLeft} moveRight={moveRight} rotate={rotate} hardDrop={hardDrop}/>
 
         <div className="user-info">
           <p>
