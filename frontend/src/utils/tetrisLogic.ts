@@ -216,7 +216,6 @@ const pieceFitInTheBoard = (piece:PieceType) => {
 
 }
 
-
 export {
     rotateShapeToLeft,
     initialPieceState,

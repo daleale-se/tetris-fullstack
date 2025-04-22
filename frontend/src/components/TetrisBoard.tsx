@@ -1,5 +1,5 @@
 import { useEffect, useRef} from "react";
-import { drawBoard } from "../utils/drawBoard";
+import { drawBoard } from "../utils/canvasLogic";
 import { insertPieceToBoard } from "../utils/tetrisLogic";
 
 const TetrisBoard = ({ board, currentPiece, moveLeft, moveRight, rotate, hardDrop, pauseGame}) => {

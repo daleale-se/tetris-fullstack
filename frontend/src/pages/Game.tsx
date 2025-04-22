@@ -1,10 +1,10 @@
-import PiecePreview from "../components/PiecePreview"
+import NextPiecePreview from "../components/NextPiecePreview"
 import TetrisBoard from "../components/TetrisBoard"
 import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
 
-  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop, gameState, pauseGame, newGame} = useTetrisGame()
+  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop, gameState, pauseGame, newGame, nextPieces} = useTetrisGame()
   
   return (
     <div>
@@ -21,7 +21,7 @@ const Game = () => {
 
         <div className="game-info">
           <p>score: {gameState.score}</p>
-          <PiecePreview/>
+          <NextPiecePreview nextPieces={nextPieces}/>
         </div>
 
         <div className="game-controls">
