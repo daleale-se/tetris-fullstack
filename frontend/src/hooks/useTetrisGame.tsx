@@ -1,0 +1,224 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import {canMoveExcessToLeft, collideOnTheBottom, collideOnTheRight, collideOnTheLeft, createEmptyBoard, getRightOverflow, initialPieceState, insertPieceToBoard, randomPiece, removeCompletedRows, rotateShapeToLeft, pieceFitInTheBoard } from "../utils/tetrisLogic";
+import { PieceBagType, PieceType } from "../types";
+import { DROP_TICK_MS, FPS, INITIAL_GAME_STATE, SCORE } from "../constants";
+
+export function useTetrisGame() {
+
+    const [gameState, setGameState] = useState(INITIAL_GAME_STATE);
+    const [board, setBoard] = useState<string[][]>(createEmptyBoard());
+    
+    const [currentPiece, setCurrentPiece] = useState<PieceType>(initialPieceState(randomPiece()));
+    const [nextPieces, setNextPieces] = useState<PieceBagType[]>([randomPiece(), randomPiece()]);
+    
+    const [tick, setTick] = useState(0);
+    
+    const animationInterval = useRef<number | null>(null);
+    const dropFrameInterval = useRef(Math.round(DROP_TICK_MS / (1000 / FPS))); 
+
+    const moveLeft = () => {
+        if (!collideOnTheLeft(currentPiece, board) && !gameState.isGameOver && !gameState.isGamePaused) {
+            setCurrentPiece(prevPiece => ({
+                ...prevPiece,
+                position: {
+                    ...prevPiece?.position,
+                    x: (prevPiece?.position.x ?? 0) - 1,
+                },
+            }));
+        }
+    }
+
+    const moveRight = () => {
+
+        if (!collideOnTheRight(currentPiece, board) && !gameState.isGameOver && !gameState.isGamePaused) {
+            setCurrentPiece(prevPiece => ({
+                ...prevPiece,
+                position: {
+                  ...prevPiece?.position, 
+                  x: (prevPiece?.position.x ?? 0) + 1, 
+                },
+            }));        
+        }
+
+    }
+
+    const rotate = () => {
+
+        if (gameState.isGameOver || gameState.isGamePaused) return;
+
+        const rotatedShape = rotateShapeToLeft(currentPiece.shape)
+    
+        const rotatedPiece = {
+            shape: rotatedShape,
+            position: {...currentPiece.position}
+        }
+    
+        const rightOverflow = getRightOverflow(rotatedPiece, board)
+    
+        if (rightOverflow > 0 && canMoveExcessToLeft(rotatedPiece, board, rightOverflow)) {
+            setCurrentPiece(prevPiece => ({
+                shape: rotatedShape,
+                position: {
+                  ...prevPiece?.position, 
+                  x: (prevPiece?.position.x ?? 0) - rightOverflow, 
+                },
+            })); 
+        } else if (rightOverflow <= 0) {
+            setCurrentPiece(rotatedPiece); 
+        }
+
+    }
+    
+    const drop = useCallback(() => {
+
+        setCurrentPiece(prevPiece => ({
+            ...prevPiece,
+            position: {
+                ...prevPiece?.position,
+                y: (prevPiece?.position.y ?? 0) + 1,
+            },
+        }));
+    
+    }, []); 
+
+    const canDrop = useCallback(() => {
+        return !collideOnTheBottom(currentPiece, board);
+    }, [board, currentPiece])
+
+    const hardDrop = () => {
+
+        if (gameState.isGameOver || gameState.isGamePaused) return;
+
+        const newPiece = JSON.parse(JSON.stringify(currentPiece)) as PieceType;
+        const originalY = newPiece.position.y;
+
+        for (let i = 0; i < board.length; i++) {
+
+            newPiece.position.y = originalY + i;
+            if (collideOnTheBottom(newPiece, board)) {
+                setCurrentPiece(newPiece)
+                return;
+            }
+
+        }
+    
+    }
+
+    const spawnNextPiece = useCallback(() => {
+        const newPiece = initialPieceState(nextPieces[0]);
+
+        if (collideOnTheBottom(newPiece, board)) {
+            setGameState(prev => ({ ...prev, isGameOver: true }));
+            return;
+        }
+
+        setCurrentPiece(newPiece);
+
+        const [, ...rest] = nextPieces;
+        setNextPieces([...rest, randomPiece()]);
+
+    }, [nextPieces, board]);
+
+    const stopAnimation = useCallback(() => {
+
+        if (animationInterval.current) {
+            cancelAnimationFrame(animationInterval.current);
+            animationInterval.current = null;
+        }
+
+    }, []);
+
+    const lockPiece = useCallback(() => {
+        
+        const newBoard = insertPieceToBoard(currentPiece, board);
+        const {board: clearedBoard, completedRows} = removeCompletedRows(newBoard);
+
+        if (pieceFitInTheBoard(currentPiece)) {
+
+            setGameState(prevGameState => ({
+                ...prevGameState,
+                score: prevGameState.score + (completedRows * SCORE),
+                linesCleared: prevGameState.linesCleared + completedRows
+            }))
+
+        } else {
+
+            setGameState(prevGameState => ({
+                ...prevGameState,
+                isGameOver: true
+            }))
+
+            stopAnimation()
+
+        }
+
+        setBoard(clearedBoard);
+
+        spawnNextPiece();
+
+    }, [currentPiece, board, spawnNextPiece, stopAnimation]);
+
+    const gameLoop = useCallback(() => {
+        setTick(prevTick => prevTick + 1);
+
+        if (tick % dropFrameInterval.current === 0 && !gameState.isGamePaused) {
+            if (canDrop()) {
+                drop();
+            } else {
+                lockPiece();
+            }
+        }
+
+        animationInterval.current = requestAnimationFrame(gameLoop);
+
+    }, [tick, gameState.isGamePaused, canDrop, drop, lockPiece]);
+
+    const startAnimation = useCallback(() => {
+
+        if (!animationInterval.current) {
+            animationInterval.current = requestAnimationFrame(gameLoop);
+        }
+
+    }, [gameLoop]);
+
+    const pauseGame = () => {
+        setGameState(prevGameState => ({
+            ...prevGameState,
+            isGamePaused: !prevGameState.isGamePaused
+        }))
+    }
+
+    const newGame = () => {
+        setGameState(INITIAL_GAME_STATE)
+        setBoard(createEmptyBoard())
+        setCurrentPiece(initialPieceState(randomPiece()))
+        setNextPieces([randomPiece(), randomPiece()])
+        startAnimation()
+    }
+
+    useEffect(() => {
+
+        startAnimation();
+        return () => stopAnimation();
+
+    }, [startAnimation, stopAnimation]);
+
+
+    return {
+      gameState,
+      board,
+      currentPiece,
+      nextPieces,
+      setCurrentPiece,
+      moveLeft,
+      moveRight,
+      rotate,
+      lockPiece,
+      drop,
+      canDrop,
+      hardDrop,
+      removeCompletedRows,
+      pauseGame,
+      newGame
+    };
+}

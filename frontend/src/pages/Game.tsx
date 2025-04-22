@@ -1,11 +1,15 @@
 import PiecePreview from "../components/PiecePreview"
-import TetrisCanvas from "../components/TetrisCanvas"
+import TetrisBoard from "../components/TetrisBoard"
+import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
+
+  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop, gameState, pauseGame, newGame} = useTetrisGame()
+  
   return (
     <div>
-      
-        <TetrisCanvas/>	
+
+        <TetrisBoard board={board} currentPiece={currentPiece} moveLeft={moveLeft} moveRight={moveRight} rotate={rotate} hardDrop={hardDrop} pauseGame={pauseGame}/>
 
         <div className="user-info">
           <p>
@@ -16,18 +20,27 @@ const Game = () => {
         </div>
 
         <div className="game-info">
-          <p>score: 1200</p>
+          <p>score: {gameState.score}</p>
           <PiecePreview/>
         </div>
 
         <div className="game-controls">
           <button>help</button>
           <br />
-          <button>pause (p)</button>
+          {
+            gameState.isGameOver 
+            ? <button onClick={newGame}>new game</button>
+            : <button onClick={pauseGame}>
+              {
+                gameState.isGamePaused 
+                ? "continue"
+                : "pause"
+              }
+            </button> 
+          }
           <br />
           <button>home</button>
           <br />
-          <button>new game</button>
         </div>
 
     </div>
