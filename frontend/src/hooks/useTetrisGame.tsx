@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {canMoveExcessToLeft, collideOnTheBottom, collideOnTheRight, collideOnTheLeft, createEmptyBoard, getRightOverflow, initialPieceState, insertPieceToBoard, randomPiece, removeCompletedRows, rotateShapeToLeft } from "../utils/tetrisLogic";
+import {canMoveExcessToLeft, collideOnTheBottom, collideOnTheRight, collideOnTheLeft, createEmptyBoard, getRightOverflow, initialPieceState, insertPieceToBoard, randomPiece, removeCompletedRows, rotateShapeToLeft, pieceFitInTheBoard } from "../utils/tetrisLogic";
 import { PieceBagType, PieceType } from "../types";
-import { DROP_TICK_MS, FPS } from "../constants";
+import { DROP_TICK_MS, FPS, SCORE } from "../constants";
 
 export function useTetrisGame() {
 
@@ -20,7 +20,7 @@ export function useTetrisGame() {
     const [pieceLocked, setPieceLocked] = useState(false);
 
     const moveLeft = () => {
-        if (!collideOnTheLeft(currentPiece, board)) {
+        if (!collideOnTheLeft(currentPiece, board) && !gameState.isGameOver) {
             setCurrentPiece(prevPiece => ({
                 ...prevPiece,
                 position: {
@@ -33,7 +33,7 @@ export function useTetrisGame() {
 
     const moveRight = () => {
 
-        if (!collideOnTheRight(currentPiece, board)) {
+        if (!collideOnTheRight(currentPiece, board) && !gameState.isGameOver) {
             setCurrentPiece(prevPiece => ({
                 ...prevPiece,
                 position: {
@@ -46,6 +46,8 @@ export function useTetrisGame() {
     }
 
     const rotate = () => {
+
+        if (gameState.isGameOver) return;
 
         const rotatedShape = rotateShapeToLeft(currentPiece.shape)
     
@@ -117,10 +119,42 @@ export function useTetrisGame() {
 
     }, [nextPieces, board]);
 
+    const [tick, setTick] = useState(0);
+    const animationInterval = useRef<number | null>(null);
+    const dropFrameInterval = useRef(Math.round(DROP_TICK_MS / (1000 / FPS))); 
+
+    const stopAnimation = useCallback(() => {
+
+        if (animationInterval.current) {
+            cancelAnimationFrame(animationInterval.current);
+            animationInterval.current = null;
+        }
+
+    }, []);
+
     const lockPiece = useCallback(() => {
         
         const newBoard = insertPieceToBoard(currentPiece, board);
-        const clearedBoard = removeCompletedRows(newBoard);
+        const {board: clearedBoard, completedRows} = removeCompletedRows(newBoard);
+
+        if (pieceFitInTheBoard(currentPiece)) {
+
+            setGameState(prevGameState => ({
+                ...prevGameState,
+                score: prevGameState.score + (completedRows * SCORE),
+                linesCleared: prevGameState.linesCleared + completedRows
+            }))
+
+        } else {
+
+            setGameState(prevGameState => ({
+                ...prevGameState,
+                isGameOver: true
+            }))
+
+            stopAnimation()
+
+        }
 
         setBoard(clearedBoard);
 
@@ -128,11 +162,7 @@ export function useTetrisGame() {
 
         setPieceLocked(prev => !prev);
 
-    }, [currentPiece, board, spawnNextPiece]);
-
-    const [tick, setTick] = useState(0);
-    const animationInterval = useRef<number | null>(null);
-    const dropFrameInterval = useRef(Math.round(DROP_TICK_MS / (1000 / FPS))); 
+    }, [currentPiece, board, spawnNextPiece, stopAnimation]);
 
     const gameLoop = useCallback(() => {
         setTick(prevTick => prevTick + 1);
@@ -157,20 +187,12 @@ export function useTetrisGame() {
 
     }, [gameLoop]);
 
-    const stopAnimation = useCallback(() => {
-
-        if (animationInterval.current) {
-            cancelAnimationFrame(animationInterval.current);
-            animationInterval.current = null;
-        }
-
-    }, []);
 
     useEffect(() => {
 
         startAnimation();
         return () => stopAnimation();
-        
+
     }, [startAnimation, stopAnimation]);
 
 
@@ -191,4 +213,3 @@ export function useTetrisGame() {
       removeCompletedRows,
     };
 }
-  

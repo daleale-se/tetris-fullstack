@@ -45,8 +45,6 @@ const insertPieceToBoard = (piece:PieceType, board:string[][]) => {
     const shape = shapeToTwoD(piece.shape)
     const pos = piece.position
 
-    
-
     for (let i = 0; i < shape.length; ++i) {
         if (0 <= pos.y - i) {
             for (let j = 0; j < shape[0].length; ++j) {
@@ -183,20 +181,41 @@ const removeCompletedRows = (board: string[][]) => {
 
     const newBoard = JSON.parse(JSON.stringify(board)) as string[][];
     let i = newBoard.length - 1;
+    let completedRows = 0;
     
     while (i >= 0) {
         const row = newBoard[i]
         if (rowIsFilled(row)) {
             newBoard.splice(i, 1);
             newBoard.unshift(emptyRow())
+            completedRows++;
         } else {
             i--;
         }
     }
 
-    return newBoard
+    return {
+        board: newBoard,
+        completedRows,
+    }
     
 }
+
+const pieceFitInTheBoard = (piece:PieceType) => {
+    
+    const shape = shapeToTwoD(piece.shape)
+    const pos = piece.position
+
+    for (let i = 0; i < shape.length; i++) {
+        if (pos.y - i < 0) {
+            return false
+        } 
+    }
+
+    return true;
+
+}
+
 
 export {
     rotateShapeToLeft,
@@ -209,5 +228,6 @@ export {
     collideOnTheBottom,
     canMoveExcessToLeft,
     getRightOverflow,
-    removeCompletedRows
+    removeCompletedRows,
+    pieceFitInTheBoard
 }

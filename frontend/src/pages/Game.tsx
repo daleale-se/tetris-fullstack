@@ -4,7 +4,7 @@ import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
 
-  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop } = useTetrisGame()
+  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop, gameState } = useTetrisGame()
   
   return (
     <div>
@@ -20,18 +20,21 @@ const Game = () => {
         </div>
 
         <div className="game-info">
-          <p>score: 1200</p>
+          <p>score: {gameState.score}</p>
           <PiecePreview/>
         </div>
 
         <div className="game-controls">
           <button>help</button>
           <br />
-          <button>pause (p)</button>
+          {
+            gameState.isGameOver 
+            ? <button>new game</button>
+            : <button>pause</button> 
+          }
           <br />
           <button>home</button>
           <br />
-          <button>new game</button>
         </div>
 
     </div>

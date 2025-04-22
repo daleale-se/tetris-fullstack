@@ -18,9 +18,11 @@ export const PIECES_SHAPES = {
 
 export const BLOCK_SIZE = 20;
 
-export const DROP_TICK_MS = 600;
+export const DROP_TICK_MS = 400;
 
 export const FPS = 60;
+
+export const SCORE = 50
 
 export const PIECES_COLORS = {
     _: "white",
