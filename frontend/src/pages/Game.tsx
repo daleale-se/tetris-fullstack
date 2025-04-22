@@ -5,36 +5,34 @@ import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
 
-  const {board, currentPiece, drop, canDrop, nextPiece, moveLeft, moveRight, rotate, hardDrop} = useTetrisGame()
+  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop } = useTetrisGame()
 
   useEffect(() => {
-    const handleKeyDown = (e:KeyboardEvent) => {
-
-      if (e.repeat) return; 
-
-      if (currentPiece.isLocked) return; // Ignore controls if piece is locked
-
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.repeat) return;
+  
       switch (e.key) {
         case 'i': rotate(); break;
         case 'k': hardDrop(); break;
         case 'j': moveLeft(); break;
-        case 'l': moveRight(); break;
+        case 'l': moveRight();break;
         default: break;
       }
     };
-
+  
     window.addEventListener('keydown', handleKeyDown);
-
+  
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
+    
   }, [rotate, hardDrop, moveLeft, moveRight]);
-
+  
 
   return (
     <div>
 
-        <TetrisBoard board={board} currentPiece={currentPiece} drop={drop} canDrop={canDrop} nextPiece={nextPiece}/>
+        <TetrisBoard board={board} currentPiece={currentPiece} />
 
         <div className="user-info">
           <p>

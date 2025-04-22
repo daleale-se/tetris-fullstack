@@ -1,191 +1,10 @@
-import { useState } from "react";
-import { createEmptyBoard } from "../utils/createEmptyBoard";
-import { BOARD_WIDTH, EMPTY_SPACE, PIECES_BAG, PIECES_SHAPES } from "../constants";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {canMoveExcessToLeft, collideOnTheBottom, collideOnTheRight, collideOnTheLeft, createEmptyBoard, getRightOverflow, initialPieceState, insertPieceToBoard, randomPiece, removeCompletedRows, rotateShapeToLeft } from "../utils/tetrisLogic";
 import { PieceBagType, PieceType } from "../types";
-
-const rotateShapeToLeft = (shape: string) => {
-    const rows = shape.split('\n');
-    const maxWidth = Math.max(...rows.map(r => r.length));
-  
-    return [...Array(maxWidth)].map((_, col) =>
-      [...rows].map(row => (row[col] || ' ')).join('')
-    ).reverse()
-     .map(row => row.trimEnd())
-     .join('\n');  
-}
-
-const initialPieceState = (name: PieceBagType): PieceType => {
-    return {
-        shape: PIECES_SHAPES[name],
-        position: {
-            x: BOARD_WIDTH / 2 - 1,
-            y: 0
-        }
-    }
-}
-
-const randomPiece = (): PieceBagType => PIECES_BAG[Math.floor(Math.random()*PIECES_BAG.length)]
-
-export const shapeToTwoD = (shape: string) => shape.split("\n").map(row => row.split(""))
-
-export const insertPieceToBoard = (piece:PieceType, board:string[][]) => {
-    const newBoard = board.map(innerArray => [...innerArray]);
-    const shape = shapeToTwoD(piece.shape)
-    const pos = piece.position
-
-    for (let i = 0; i < shape.length; ++i) {
-        if (pos.y - i >= 0) {
-            for (let j = 0; j < shape[0].length; ++j) {
-                
-                const yTarget = shape.length - 1 - i;
-                if (shape[yTarget][j] !== EMPTY_SPACE) {
-                    newBoard[pos.y - i][pos.x + j] = shape[yTarget][j];
-                }
-            }
-        }
-    }
-
-    return newBoard;
-}
-
-const collideOnTheRight = (piece:PieceType, board:string[][]) => {
-    const newBoard = board.map(innerArray => [...innerArray]);
-    const shape = shapeToTwoD(piece.shape)
-    const pos = piece.position
-
-    if (pos.x + shape[0].length > newBoard[0].length - 1){
-        return true;
-    }
-
-    for (let i = 0; i < shape.length; ++i) {
-        for (let j = 0; j < shape[0].length; ++j) {
-            const checkY = pos.y - shape.length + 1 + i;
-            const checkX = shape[0].length - 1 - j;
-            if (shape[i][checkX] !== EMPTY_SPACE) {
-                if (checkY >= 0 && newBoard[checkY][pos.x + checkX + 1] !== EMPTY_SPACE) {
-                    return true;
-                }
-                break;
-            }
-        }
-    }
-
-    return false;
-}
-
-const collideOnTheLeft = (piece:PieceType, board:string[][]) => {
-    const newBoard = board.map(innerArray => [...innerArray]);
-    const shape = shapeToTwoD(piece.shape)
-    const pos = piece.position
-
-    if (pos.x - 1 < 0){
-        return true;
-    }
-
-    for (let i = 0; i < shape.length; ++i) {
-        for (let j = 0; j < shape[0].length; ++j) {
-            const checkY = pos.y - shape.length + 1 + i;
-            const checkX = pos.x + j;
-            if (shape[i][j] !== EMPTY_SPACE) {
-                if (checkY >= 0 && newBoard[checkY][checkX - 1] !== EMPTY_SPACE) {
-                    return true;
-                }
-                break;
-            }
-        }
-    }
-
-    return false;
-
-}
-
-const collideOnTheBottom = (piece:PieceType, board:string[][]) => {
-    const newBoard = board.map(innerArray => [...innerArray]);
-    const shape = shapeToTwoD(piece.shape)
-    const pos = piece.position
-
-    if (pos.y + 1 >= newBoard.length) {
-        return true;
-    }
-
-    for (let i = 0; i < shape[0].length; ++i) {
-        for (let j = 0; j < shape.length; ++j) {
-            if (shape[shape.length - 1 - j][i] != EMPTY_SPACE) {
-                const nextY = pos.y - j + 1;
-                const nextX = pos.x + i;
-                if (nextY >= 0 && newBoard[nextY][nextX] != EMPTY_SPACE) {
-                    return true;
-                }
-                break;
-            }
-        }
-    }
-
-    return false;
-
-}
-
-const canMoveExcessToLeft = (piece:PieceType, board:string[][], rightOverflow:number) => {
-    
-    for (let i = 0; i < rightOverflow; i++) {
-        if (collideOnTheLeft(piece, board)) {
-            return false
-        }
-        piece.position.x--;
-    }
-    
-    return true;
-
-}
-
-const getRightOverflow = (piece:PieceType, board:string[][]) => {
-
-    const shape = shapeToTwoD(piece.shape)
-    const {position : pos} = piece
-    
-    if (pos.x + shape[0].length > board[0].length) {
-        return pos.x + shape[0].length - board[0].length
-    }
-
-    for (let i = 0; i < shape[0].length; i++) {
-        for (let j = 0; j < shape.length; j++) {
-
-            if (pos.y - j > 0 && shape[shape.length - 1 - j][1 + i] !== EMPTY_SPACE && board[pos.y - j][pos.x + 1 + i] !== EMPTY_SPACE) {
-                return shape[0].length - (1 + i)
-            } 
-    
-        }
-    }
-
-    return -1
-
-}
-
-const rowIsFilled = (row: string[]) => row.indexOf(EMPTY_SPACE) === -1;
-
-const emptyRow = () => new Array(BOARD_WIDTH).fill(EMPTY_SPACE);
-
-const removeCompletedRows = (board: string[][]) => {
-
-    const newBoard = JSON.parse(JSON.stringify(board)) as string[][];
-    let i = newBoard.length - 1;
-    
-    while (i >= 0) {
-        const row = newBoard[i]
-        if (rowIsFilled(row)) {
-            newBoard.splice(i, 1);
-            newBoard.unshift(emptyRow())
-        } else {
-            i--;
-        }
-    }
-
-    return newBoard
-    
-}
+import { DROP_TICK_MS, FPS } from "../constants";
 
 export function useTetrisGame() {
-    // Core game state
+
     const [gameState, setGameState] = useState({
       isGameOver: false,
       score: 0,
@@ -193,41 +12,23 @@ export function useTetrisGame() {
       linesCleared: 0
     });
     
-    // Board state (typically a 2D array)
     const [board, setBoard] = useState<string[][]>(createEmptyBoard());
-    // const [inGameBoard, setInGameBoard] = useState<string[][]>(board);
     
-    // Current active piece and next pieces
     const [currentPiece, setCurrentPiece] = useState<PieceType>(initialPieceState(randomPiece()));
     const [nextPieces, setNextPieces] = useState<PieceBagType[]>([randomPiece(), randomPiece()]);
-        
-    // Game logic functions...
     
-    const nextPiece = () => {
-
-        // insert the piece before pass to another piece
-        const newBoard = insertPieceToBoard(currentPiece, board)
-        setBoard(removeCompletedRows(newBoard))
-
-        const newPiece = randomPiece()
-        setCurrentPiece(initialPieceState(nextPieces[0]))
-        const [, ...rest] = nextPieces
-        setNextPieces([...rest, newPiece])
-
-    }
+    const [pieceLocked, setPieceLocked] = useState(false);
 
     const moveLeft = () => {
-
         if (!collideOnTheLeft(currentPiece, board)) {
             setCurrentPiece(prevPiece => ({
                 ...prevPiece,
                 position: {
-                  ...prevPiece?.position, 
-                  x: (prevPiece?.position.x ?? 0) - 1, 
+                    ...prevPiece?.position,
+                    x: (prevPiece?.position.x ?? 0) - 1,
                 },
             }));
         }
-
     }
 
     const moveRight = () => {
@@ -269,19 +70,19 @@ export function useTetrisGame() {
 
     }
     
-    const drop = () => {
+    const drop = useCallback(() => {
         setCurrentPiece(prevPiece => ({
             ...prevPiece,
             position: {
-                ...prevPiece?.position, 
-                y: (prevPiece?.position.y ?? 0) + 1, 
+                ...prevPiece?.position,
+                y: (prevPiece?.position.y ?? 0) + 1,
             },
         }));
-    }
+    }, []); 
 
-    const canDrop = () => {
-        return !collideOnTheBottom(currentPiece, board)
-    }
+    const canDrop = useCallback(() => {
+        return !collideOnTheBottom(currentPiece, board);
+    }, [board, currentPiece])
 
     const hardDrop = () => {
 
@@ -293,6 +94,7 @@ export function useTetrisGame() {
             newPiece.position.y = originalY + i;
             if (collideOnTheBottom(newPiece, board)) {
                 setCurrentPiece(newPiece)
+                // nextPiece()
                 return;
             }
 
@@ -300,28 +102,93 @@ export function useTetrisGame() {
     
     }
 
-    // useEffect(() => {
+    const spawnNextPiece = useCallback(() => {
+        const newPiece = initialPieceState(nextPieces[0]);
 
-    //     const newBoard = insertPieceToBoard(currentPiece, board);
-    //     setInGameBoard(newBoard);
+        if (collideOnTheBottom(newPiece, board)) {
+            setGameState(prev => ({ ...prev, isGameOver: true }));
+            return;
+        }
 
-    // }, [currentPiece, board]);
+        setCurrentPiece(newPiece);
+
+        const [, ...rest] = nextPieces;
+        setNextPieces([...rest, randomPiece()]);
+
+    }, [nextPieces, board]);
+
+    const lockPiece = useCallback(() => {
+        
+        const newBoard = insertPieceToBoard(currentPiece, board);
+        const clearedBoard = removeCompletedRows(newBoard);
+
+        setBoard(clearedBoard);
+
+        spawnNextPiece();
+
+        setPieceLocked(prev => !prev);
+
+    }, [currentPiece, board, spawnNextPiece]);
+
+    const [tick, setTick] = useState(0);
+    const animationInterval = useRef<number | null>(null);
+    const dropFrameInterval = useRef(Math.round(DROP_TICK_MS / (1000 / FPS))); 
+
+    const gameLoop = useCallback(() => {
+        setTick(prevTick => prevTick + 1);
+
+        if (tick % dropFrameInterval.current === 0) {
+            if (canDrop()) {
+                drop();
+            } else {
+                lockPiece();
+            }
+        }
+
+        animationInterval.current = requestAnimationFrame(gameLoop);
+
+    }, [canDrop, drop, lockPiece, tick, setTick]);
+
+    const startAnimation = useCallback(() => {
+
+        if (!animationInterval.current) {
+            animationInterval.current = requestAnimationFrame(gameLoop);
+        }
+
+    }, [gameLoop]);
+
+    const stopAnimation = useCallback(() => {
+
+        if (animationInterval.current) {
+            cancelAnimationFrame(animationInterval.current);
+            animationInterval.current = null;
+        }
+
+    }, []);
+
+    useEffect(() => {
+
+        startAnimation();
+        return () => stopAnimation();
+        
+    }, [startAnimation, stopAnimation]);
+
 
     return {
       gameState,
       board,
       currentPiece,
       nextPieces,
+      pieceLocked,
+      setCurrentPiece,
       moveLeft,
       moveRight,
       rotate,
-      nextPiece,
+      lockPiece,
       drop,
       canDrop,
       hardDrop,
-      removeCompletedRows
-    //   startGame,
-    //   pauseGame
+      removeCompletedRows,
     };
 }
   
