@@ -24,6 +24,14 @@ export const FPS = 60;
 
 export const SCORE = 50
 
+export const INITIAL_GAME_STATE = {
+    isGameOver: false,
+    isGamePaused: false,
+    score: 0,
+    difficulty: 1,
+    linesCleared: 0
+}
+
 export const PIECES_COLORS = {
     _: "white",
     I: "green",

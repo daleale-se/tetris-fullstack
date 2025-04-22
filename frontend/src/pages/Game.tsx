@@ -4,12 +4,12 @@ import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
 
-  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop, gameState } = useTetrisGame()
+  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop, gameState, pauseGame, newGame} = useTetrisGame()
   
   return (
     <div>
 
-        <TetrisBoard board={board} currentPiece={currentPiece} moveLeft={moveLeft} moveRight={moveRight} rotate={rotate} hardDrop={hardDrop}/>
+        <TetrisBoard board={board} currentPiece={currentPiece} moveLeft={moveLeft} moveRight={moveRight} rotate={rotate} hardDrop={hardDrop} pauseGame={pauseGame}/>
 
         <div className="user-info">
           <p>
@@ -29,8 +29,14 @@ const Game = () => {
           <br />
           {
             gameState.isGameOver 
-            ? <button>new game</button>
-            : <button>pause</button> 
+            ? <button onClick={newGame}>new game</button>
+            : <button onClick={pauseGame}>
+              {
+                gameState.isGamePaused 
+                ? "continue"
+                : "pause"
+              }
+            </button> 
           }
           <br />
           <button>home</button>
