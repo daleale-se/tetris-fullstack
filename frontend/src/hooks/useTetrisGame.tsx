@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {canMoveExcessToLeft, collideOnTheBottom, collideOnTheRight, collideOnTheLeft, createEmptyBoard, getRightOverflow, initialPieceState, insertPieceToBoard, randomPiece, removeCompletedRows, rotateShapeToLeft, pieceFitInTheBoard } from "../utils/tetrisLogic";
+import {canMoveExcessToLeft, collideOnTheBottom, collideOnTheRight, collideOnTheLeft, createEmptyBoard, getRightOverflow, initialPieceState, insertPieceToBoard, randomPiece, removeCompletedRows, rotateShapeToLeft, pieceFitInTheBoard, getDifficulty } from "../utils/tetrisLogic";
 import { PieceBagType, PieceType } from "../types";
 import { DIFFICULTIES, FPS, INITIAL_GAME_STATE, SCORE } from "../constants";
 
@@ -14,10 +14,12 @@ export function useTetrisGame() {
     const [tick, setTick] = useState(0);
     
     const animationInterval = useRef<number | null>(null);
-    const dropFrameInterval = useRef(Math.round(DIFFICULTIES[gameState.difficulty] / (1000 / FPS))); 
+    const dropFrameInterval = useRef<number>(Math.round(DIFFICULTIES[gameState.difficulty] / (1000 / FPS))); 
+
+    const isPlaying = () => !gameState.isGameOver && !gameState.isGamePaused;
 
     const moveLeft = () => {
-        if (!collideOnTheLeft(currentPiece, board) && !gameState.isGameOver && !gameState.isGamePaused) {
+        if (!collideOnTheLeft(currentPiece, board) && isPlaying()) {
             setCurrentPiece(prevPiece => ({
                 ...prevPiece,
                 position: {
@@ -30,7 +32,7 @@ export function useTetrisGame() {
 
     const moveRight = () => {
 
-        if (!collideOnTheRight(currentPiece, board) && !gameState.isGameOver && !gameState.isGamePaused) {
+        if (!collideOnTheRight(currentPiece, board) && isPlaying()) {
             setCurrentPiece(prevPiece => ({
                 ...prevPiece,
                 position: {
@@ -44,7 +46,7 @@ export function useTetrisGame() {
 
     const rotate = () => {
 
-        if (gameState.isGameOver || gameState.isGamePaused) return;
+        if (!isPlaying()) return;
 
         const rotatedShape = rotateShapeToLeft(currentPiece.shape)
     
@@ -82,7 +84,9 @@ export function useTetrisGame() {
     }, []); 
 
     const canDrop = useCallback(() => {
+
         return !collideOnTheBottom(currentPiece, board);
+
     }, [board, currentPiece])
 
     const hardDrop = () => {
@@ -128,16 +132,7 @@ export function useTetrisGame() {
 
     }, []);
 
-    const setDiff = (num) => {
-        if (500 <= num && num < 1000) {
-            return "normal"
-        } else if (1000 <= num) {
-            return "hard"
-        } else {
-            return "easy"
-        }
-    }
-
+    
     const lockPiece = useCallback(() => {
         
         const newBoard = insertPieceToBoard(currentPiece, board);
@@ -154,7 +149,7 @@ export function useTetrisGame() {
                     ...prevGameState,
                     score: newScore,
                     linesCleared: prevGameState.linesCleared + completedRows,
-                    difficulty: setDiff(newScore)
+                    difficulty: getDifficulty(newScore)
                 }
             })
 

@@ -1,4 +1,4 @@
-import { UserInfoType, UserFormType, UserInputType, PieceBagType } from "./types"
+import { UserInfoType, UserFormType, UserInputType, PieceBagType, GameStateType, Difficulty } from "./types"
 
 export const BOARD_WIDTH = 10
 export const BOARD_HEIGHT = 20
@@ -18,25 +18,31 @@ export const PIECES_SHAPES = {
 
 export const BLOCK_SIZE = 20;
 
-export const DROP_EASY = 500;
-export const DROP_NORMAL = 300;
-export const DROP_HARD = 100;
+export const DIFFICULTY_THRESHOLDS = [
+    { score: 8000, difficulty: Difficulty.IMPOSSIBLE },
+    { score: 3000, difficulty: Difficulty.VERY_HARD },
+    { score: 1000, difficulty: Difficulty.HARD },
+    { score: 500, difficulty: Difficulty.NORMAL },
+    { score: 0, difficulty: Difficulty.EASY }
+];
 
 export const DIFFICULTIES = {
-    "easy": DROP_EASY,
-    "normal": DROP_NORMAL,
-    "hard": DROP_HARD
+    [Difficulty.EASY]: 500,
+    [Difficulty.NORMAL]: 300,
+    [Difficulty.HARD]: 200,
+    [Difficulty.VERY_HARD]: 100,
+    [Difficulty.IMPOSSIBLE]: 80
 }
 
 export const FPS = 60;
 
 export const SCORE = 50
 
-export const INITIAL_GAME_STATE = {
+export const INITIAL_GAME_STATE: GameStateType = {
     isGameOver: false,
     isGamePaused: false,
     score: 0,
-    difficulty: 'easy',
+    difficulty: Difficulty.EASY,
     linesCleared: 0
 }
 
