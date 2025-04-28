@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {canMoveExcessToLeft, collideOnTheBottom, collideOnTheRight, collideOnTheLeft, createEmptyBoard, getRightOverflow, initialPieceState, insertPieceToBoard, randomPiece, removeCompletedRows, rotateShapeToLeft, pieceFitInTheBoard } from "../utils/tetrisLogic";
 import { PieceBagType, PieceType } from "../types";
-import { DROP_TICK_MS, FPS, INITIAL_GAME_STATE, SCORE } from "../constants";
+import { DIFFICULTIES, FPS, INITIAL_GAME_STATE, SCORE } from "../constants";
 
 export function useTetrisGame() {
 
@@ -14,7 +14,7 @@ export function useTetrisGame() {
     const [tick, setTick] = useState(0);
     
     const animationInterval = useRef<number | null>(null);
-    const dropFrameInterval = useRef(Math.round(DROP_TICK_MS / (1000 / FPS))); 
+    const dropFrameInterval = useRef(Math.round(DIFFICULTIES[gameState.difficulty] / (1000 / FPS))); 
 
     const moveLeft = () => {
         if (!collideOnTheLeft(currentPiece, board) && !gameState.isGameOver && !gameState.isGamePaused) {
@@ -128,6 +128,16 @@ export function useTetrisGame() {
 
     }, []);
 
+    const setDiff = (num) => {
+        if (500 <= num && num < 1000) {
+            return "normal"
+        } else if (1000 <= num) {
+            return "hard"
+        } else {
+            return "easy"
+        }
+    }
+
     const lockPiece = useCallback(() => {
         
         const newBoard = insertPieceToBoard(currentPiece, board);
@@ -135,11 +145,18 @@ export function useTetrisGame() {
 
         if (pieceFitInTheBoard(currentPiece)) {
 
-            setGameState(prevGameState => ({
-                ...prevGameState,
-                score: prevGameState.score + (completedRows * SCORE),
-                linesCleared: prevGameState.linesCleared + completedRows
-            }))
+
+            setGameState(prevGameState => {
+
+                const newScore = prevGameState.score + (completedRows * SCORE)
+
+                return {
+                    ...prevGameState,
+                    score: newScore,
+                    linesCleared: prevGameState.linesCleared + completedRows,
+                    difficulty: setDiff(newScore)
+                }
+            })
 
         } else {
 
@@ -203,6 +220,11 @@ export function useTetrisGame() {
 
     }, [startAnimation, stopAnimation]);
 
+
+    useEffect(() => {
+        dropFrameInterval.current = Math.round(DIFFICULTIES[gameState.difficulty] / (1000 / FPS));
+    }, [gameState.difficulty]);
+    
 
     return {
       gameState,

@@ -18,7 +18,15 @@ export const PIECES_SHAPES = {
 
 export const BLOCK_SIZE = 20;
 
-export const DROP_TICK_MS = 400;
+export const DROP_EASY = 500;
+export const DROP_NORMAL = 300;
+export const DROP_HARD = 100;
+
+export const DIFFICULTIES = {
+    "easy": DROP_EASY,
+    "normal": DROP_NORMAL,
+    "hard": DROP_HARD
+}
 
 export const FPS = 60;
 
@@ -28,7 +36,7 @@ export const INITIAL_GAME_STATE = {
     isGameOver: false,
     isGamePaused: false,
     score: 0,
-    difficulty: 1,
+    difficulty: 'easy',
     linesCleared: 0
 }
 

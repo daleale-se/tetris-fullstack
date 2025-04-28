@@ -30,6 +30,8 @@ export type UserDataType = {
   image_path: string
 }
 
+export type DifficultyType = 'easy'|'normal'|'hard'
+
 export type PieceBagType = 'I'|'O'|'J'|'L'|'T'|'S'|'Z'
 
 export type PieceType = {
