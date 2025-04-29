@@ -7,7 +7,6 @@ export type RegisterUserType = (data: UserInputType) => void
 
 export type LoginUserType = (data: UserInputType, setUserInfo: React.Dispatch<React.SetStateAction<UserInfoType>>) => void
 
-
 export type UserFormType = {
     mode: "register" | "login" | null,
     isOpen: boolean
@@ -38,4 +37,21 @@ export type PieceType = {
         x: number,
         y: number
     }
+}
+
+export enum Difficulty {
+    EASY = "easy",
+    NORMAL = "normal",
+    HARD = "hard",
+    VERY_HARD = "very hard",
+    IMPOSSIBLE = "impossible"
+}
+
+
+export type GameStateType = {
+    isGameOver: boolean,
+    isGamePaused: boolean,
+    score: 0,
+    difficulty: Difficulty,
+    linesCleared: 0
 }

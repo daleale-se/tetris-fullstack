@@ -1,5 +1,5 @@
-import { BOARD_HEIGHT, BOARD_WIDTH, EMPTY_SPACE, PIECES_BAG, PIECES_SHAPES } from "../constants";
-import { PieceBagType, PieceType } from "../types";
+import { BOARD_HEIGHT, BOARD_WIDTH, EMPTY_SPACE, PIECES_BAG, PIECES_SHAPES, DIFFICULTY_THRESHOLDS } from "../constants";
+import { Difficulty, PieceBagType, PieceType } from "../types";
 
 export const createEmptyBoard = () => {
     const board: string[][] = []
@@ -216,6 +216,16 @@ const pieceFitInTheBoard = (piece:PieceType) => {
 
 }
 
+const getDifficulty = (score: number): Difficulty => {
+    for (const threshold of DIFFICULTY_THRESHOLDS) {
+        if (score >= threshold.score) {
+            return threshold.difficulty;
+        }
+    }
+
+    return Difficulty.EASY;
+};
+
 
 export {
     rotateShapeToLeft,
@@ -229,5 +239,6 @@ export {
     canMoveExcessToLeft,
     getRightOverflow,
     removeCompletedRows,
-    pieceFitInTheBoard
+    pieceFitInTheBoard,
+    getDifficulty
 }

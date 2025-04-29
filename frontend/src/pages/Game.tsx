@@ -1,46 +1,48 @@
-import PiecePreview from "../components/PiecePreview"
+import NextPiecePreview from "../components/NextPiecePreview"
 import TetrisBoard from "../components/TetrisBoard"
 import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
 
-  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop, gameState, pauseGame, newGame} = useTetrisGame()
+  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop, gameState, pauseGame, newGame, nextPieces, softDrop} = useTetrisGame()
   
   return (
-    <div>
+    <div style={{display: "flex"}}>
 
-        <TetrisBoard board={board} currentPiece={currentPiece} moveLeft={moveLeft} moveRight={moveRight} rotate={rotate} hardDrop={hardDrop} pauseGame={pauseGame}/>
+        <TetrisBoard board={board} currentPiece={currentPiece} moveLeft={moveLeft} moveRight={moveRight} rotate={rotate} hardDrop={hardDrop} pauseGame={pauseGame} softDrop={softDrop}/>
 
-        <div className="user-info">
-          <p>
-            <span>username</span>
-            <span>(3)</span>
-          </p>
-          {/* <p><span>guest</span></p> */}
-        </div>
+        <div style={{display:"flex", flexDirection:"column"}}>
 
-        <div className="game-info">
-          <p>score: {gameState.score}</p>
-          <PiecePreview/>
-        </div>
+          <div className="game-info">
+            <NextPiecePreview nextPieces={nextPieces}/>
+            <p>score: {gameState.score}</p>
+            <p>difficulty: {gameState.difficulty}</p>
+          </div>
 
-        <div className="game-controls">
-          <button>help</button>
-          <br />
-          {
-            gameState.isGameOver 
-            ? <button onClick={newGame}>new game</button>
-            : <button onClick={pauseGame}>
-              {
-                gameState.isGamePaused 
-                ? "continue"
-                : "pause"
-              }
-            </button> 
-          }
-          <br />
-          <button>home</button>
-          <br />
+          <div className="user-info">
+            <p>
+              <span>username</span>
+              <span>(3)</span>
+            </p>
+            <p>experience: 33/100</p>
+          </div>
+
+          <div className="game-controls" style={{display:"flex", flexDirection:"column"}}>
+            <button>help</button>
+            {
+              gameState.isGameOver 
+              ? <button onClick={newGame}>new game</button>
+              : <button onClick={pauseGame}>
+                {
+                  gameState.isGamePaused 
+                  ? "continue"
+                  : "pause"
+                }
+              </button> 
+            }
+            <button>home</button>
+          </div>
+
         </div>
 
     </div>
