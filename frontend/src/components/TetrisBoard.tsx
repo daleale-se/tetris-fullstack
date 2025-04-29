@@ -2,7 +2,7 @@ import { useEffect, useRef} from "react";
 import { drawBoard } from "../utils/canvasLogic";
 import { insertPieceToBoard } from "../utils/tetrisLogic";
 
-const TetrisBoard = ({ board, currentPiece, moveLeft, moveRight, rotate, hardDrop, pauseGame}) => {
+const TetrisBoard = ({ board, currentPiece, moveLeft, moveRight, rotate, hardDrop, pauseGame, softDrop}) => {
   const canvasRef = useRef(null);
 
   const mergedBoard = insertPieceToBoard(currentPiece, board);
@@ -20,7 +20,8 @@ const TetrisBoard = ({ board, currentPiece, moveLeft, moveRight, rotate, hardDro
   
       switch (e.key) {
         case 'i': rotate(); break;
-        case 'k': hardDrop(); break;
+        case 'k': softDrop(); break;
+        case ' ': hardDrop(); break;
         case 'j': moveLeft(); break;
         case 'l': moveRight(); break;
         case 'p': pauseGame(); break;

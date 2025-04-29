@@ -4,12 +4,12 @@ import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
 
-  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop, gameState, pauseGame, newGame, nextPieces} = useTetrisGame()
+  const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop, gameState, pauseGame, newGame, nextPieces, softDrop} = useTetrisGame()
   
   return (
     <div style={{display: "flex"}}>
 
-        <TetrisBoard board={board} currentPiece={currentPiece} moveLeft={moveLeft} moveRight={moveRight} rotate={rotate} hardDrop={hardDrop} pauseGame={pauseGame}/>
+        <TetrisBoard board={board} currentPiece={currentPiece} moveLeft={moveLeft} moveRight={moveRight} rotate={rotate} hardDrop={hardDrop} pauseGame={pauseGame} softDrop={softDrop}/>
 
         <div style={{display:"flex", flexDirection:"column"}}>
 

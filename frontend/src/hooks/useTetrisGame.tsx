@@ -44,6 +44,14 @@ export function useTetrisGame() {
 
     }
 
+    const softDrop = () => {
+        
+        if (!collideOnTheBottom(currentPiece, board)){
+            drop()
+        }
+
+    }
+
     const rotate = () => {
 
         if (!isPlaying()) return;
@@ -82,12 +90,6 @@ export function useTetrisGame() {
         }));
     
     }, []); 
-
-    const canDrop = useCallback(() => {
-
-        return !collideOnTheBottom(currentPiece, board);
-
-    }, [board, currentPiece])
 
     const hardDrop = () => {
 
@@ -174,7 +176,7 @@ export function useTetrisGame() {
         setTick(prevTick => prevTick + 1);
 
         if (tick % dropFrameInterval.current === 0 && !gameState.isGamePaused) {
-            if (canDrop()) {
+            if (!collideOnTheBottom(currentPiece, board)) {
                 drop();
             } else {
                 lockPiece();
@@ -183,7 +185,7 @@ export function useTetrisGame() {
 
         animationInterval.current = requestAnimationFrame(gameLoop);
 
-    }, [tick, gameState.isGamePaused, canDrop, drop, lockPiece]);
+    }, [tick, gameState.isGamePaused, currentPiece, board, drop, lockPiece]);
 
     const startAnimation = useCallback(() => {
 
@@ -217,7 +219,9 @@ export function useTetrisGame() {
 
 
     useEffect(() => {
+
         dropFrameInterval.current = Math.round(DIFFICULTIES[gameState.difficulty] / (1000 / FPS));
+        
     }, [gameState.difficulty]);
     
 
@@ -232,10 +236,10 @@ export function useTetrisGame() {
       rotate,
       lockPiece,
       drop,
-      canDrop,
       hardDrop,
       removeCompletedRows,
       pauseGame,
-      newGame
+      newGame,
+      softDrop
     };
 }
