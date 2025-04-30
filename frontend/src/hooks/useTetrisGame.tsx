@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {canMoveExcessToLeft, collideOnTheBottom, collideOnTheRight, collideOnTheLeft, createEmptyBoard, getRightOverflow, initialPieceState, insertPieceToBoard, randomPiece, removeCompletedRows, rotateShapeToLeft, pieceFitInTheBoard, getDifficulty } from "../utils/tetrisLogic";
 import { PieceBagType, PieceType } from "../types";
 import { DIFFICULTIES, FPS, INITIAL_GAME_STATE, SCORE } from "../constants";
+import { UserContext } from "../context/UserContext";
+import { updateUserStats } from "../services/user";
 
 export function useTetrisGame() {
 
@@ -110,21 +112,6 @@ export function useTetrisGame() {
     
     }
 
-    const spawnNextPiece = useCallback(() => {
-        const newPiece = initialPieceState(nextPieces[0]);
-
-        if (collideOnTheBottom(newPiece, board)) {
-            setGameState(prev => ({ ...prev, isGameOver: true }));
-            return;
-        }
-
-        setCurrentPiece(newPiece);
-
-        const [, ...rest] = nextPieces;
-        setNextPieces([...rest, randomPiece()]);
-
-    }, [nextPieces, board]);
-
     const stopAnimation = useCallback(() => {
 
         if (animationInterval.current) {
@@ -133,6 +120,37 @@ export function useTetrisGame() {
         }
 
     }, []);
+
+    const {setUserData} = useContext(UserContext)
+
+    const spawnNextPiece = useCallback(async () => {
+        const newPiece = initialPieceState(nextPieces[0]);
+
+        if (collideOnTheBottom(newPiece, board)) {
+            setGameState(prev => ({ ...prev, isGameOver: true }));
+
+            const token = sessionStorage.getItem("token")
+            if (token) {
+                const payload = {
+                    score: gameState.score,
+                    linesCleared: gameState.linesCleared,
+                    xpGained: 35
+                }
+                const updatedUserData = await updateUserStats(token, payload)
+                setUserData(updatedUserData)
+            }
+
+            stopAnimation()
+
+            return;
+        }
+
+        setCurrentPiece(newPiece);
+
+        const [, ...rest] = nextPieces;
+        setNextPieces([...rest, randomPiece()]);
+
+    }, [nextPieces, board, stopAnimation, gameState.score, gameState.linesCleared, setUserData]);
 
     
     const lockPiece = useCallback(() => {

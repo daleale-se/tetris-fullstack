@@ -1,29 +1,13 @@
-import { useContext, useEffect } from "react"
-import { UserDataType } from "../types"
-import { getUserData } from "../services/user"
+import { useContext } from "react"
 import { UserContext } from "../context/UserContext"
 
 const Profile = () => {
 
-  const {setUserData, userData} = useContext(UserContext)
-
-  useEffect(() => {
-
-    const fetchUser = async () => {
-      const token = sessionStorage.getItem("token")
-      if (token) {
-        const usersData: UserDataType = await getUserData(token)
-        setUserData(usersData)
-      }
-    }
-
-    fetchUser()
-
-  }, [])
+  const { userData } = useContext(UserContext)
 
   return (
     <div>
-      <img src={userData?.imagePath} alt={userData?.username+"_img"} />
+      <img src={userData?.imagePath} alt={userData?.username+"_img"} width={80}/>
       <h2>{userData?.username} <button>change username</button></h2>
       <p>Level: {userData?.level}</p>
       <p>XP: {userData?.xp} / {userData?.limitXp}</p>

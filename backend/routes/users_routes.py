@@ -81,6 +81,7 @@ def update_stats():
 
     user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
     user["_id"] = str(user["_id"])
+    
     return jsonify(user), 200
 
 @users_bp.route("", methods=["DELETE"])
@@ -111,4 +112,4 @@ def get_users_sort_by_score():
 def get_user_data():
     current_user_id = get_jwt_identity()
     user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
-    return jsonify({"user": user}), 200
+    return jsonify(user), 200

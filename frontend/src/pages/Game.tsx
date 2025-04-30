@@ -1,11 +1,14 @@
+import { useContext } from "react"
 import NextPiecePreview from "../components/NextPiecePreview"
 import TetrisBoard from "../components/TetrisBoard"
+import { UserContext } from "../context/UserContext"
 import { useTetrisGame } from "../hooks/useTetrisGame"
 
 const Game = () => {
 
   const {board, currentPiece, moveLeft, moveRight, rotate, hardDrop, gameState, pauseGame, newGame, nextPieces, softDrop} = useTetrisGame()
-  
+  const { userData } = useContext(UserContext)  
+
   return (
     <div style={{display: "flex"}}>
 
@@ -21,10 +24,10 @@ const Game = () => {
 
           <div className="user-info">
             <p>
-              <span>username</span>
-              <span>(3)</span>
+              <span>{userData?.username}</span>
+              <span>({userData?.level})</span>
             </p>
-            <p>experience: 33/100</p>
+            <p>xp: {userData?.xp} / {userData?.limitXp}</p>
           </div>
 
           <div className="game-controls" style={{display:"flex", flexDirection:"column"}}>
