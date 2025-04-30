@@ -19,19 +19,27 @@ export const PIECES_SHAPES = {
 export const BLOCK_SIZE = 20;
 
 export const DIFFICULTY_THRESHOLDS = [
-    { score: 8000, difficulty: Difficulty.IMPOSSIBLE },
+    { score: 6000, difficulty: Difficulty.IMPOSSIBLE },
     { score: 3000, difficulty: Difficulty.VERY_HARD },
-    { score: 1000, difficulty: Difficulty.HARD },
+    { score: 1500, difficulty: Difficulty.HARD },
     { score: 500, difficulty: Difficulty.NORMAL },
     { score: 0, difficulty: Difficulty.EASY }
 ];
 
 export const DIFFICULTIES = {
-    [Difficulty.EASY]: 500,
-    [Difficulty.NORMAL]: 300,
-    [Difficulty.HARD]: 200,
-    [Difficulty.VERY_HARD]: 100,
-    [Difficulty.IMPOSSIBLE]: 80
+    [Difficulty.EASY]: 700,
+    [Difficulty.NORMAL]: 500,
+    [Difficulty.HARD]: 350,
+    [Difficulty.VERY_HARD]: 225,
+    [Difficulty.IMPOSSIBLE]: 100
+}
+
+export const XP_BY_DIFFICULTY = {
+    [Difficulty.EASY]: 20,
+    [Difficulty.NORMAL]: 40,
+    [Difficulty.HARD]: 100,
+    [Difficulty.VERY_HARD]: 220,
+    [Difficulty.IMPOSSIBLE]: 500
 }
 
 export const FPS = 60;

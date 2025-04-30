@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {canMoveExcessToLeft, collideOnTheBottom, collideOnTheRight, collideOnTheLeft, createEmptyBoard, getRightOverflow, initialPieceState, insertPieceToBoard, randomPiece, removeCompletedRows, rotateShapeToLeft, pieceFitInTheBoard, getDifficulty } from "../utils/tetrisLogic";
 import { PieceBagType, PieceType } from "../types";
-import { DIFFICULTIES, FPS, INITIAL_GAME_STATE, SCORE } from "../constants";
+import { DIFFICULTIES, FPS, INITIAL_GAME_STATE, SCORE, XP_BY_DIFFICULTY } from "../constants";
 import { UserContext } from "../context/UserContext";
 import { updateUserStats } from "../services/user";
 
@@ -134,7 +134,7 @@ export function useTetrisGame() {
                 const payload = {
                     score: gameState.score,
                     linesCleared: gameState.linesCleared,
-                    xpGained: 35
+                    xpGained: XP_BY_DIFFICULTY[gameState.difficulty] + gameState.linesCleared
                 }
                 const updatedUserData = await updateUserStats(token, payload)
                 setUserData(updatedUserData)
@@ -150,7 +150,7 @@ export function useTetrisGame() {
         const [, ...rest] = nextPieces;
         setNextPieces([...rest, randomPiece()]);
 
-    }, [nextPieces, board, stopAnimation, gameState.score, gameState.linesCleared, setUserData]);
+    }, [nextPieces, board, stopAnimation, gameState.score, gameState.linesCleared, gameState.difficulty, setUserData]);
   
     const lockPiece = useCallback(() => {
         
@@ -158,7 +158,6 @@ export function useTetrisGame() {
         const {board: clearedBoard, completedRows} = removeCompletedRows(newBoard);
 
         if (pieceFitInTheBoard(currentPiece)) {
-
 
             setGameState(prevGameState => {
 
@@ -172,22 +171,13 @@ export function useTetrisGame() {
                 }
             })
 
-        } else {
-
-            setGameState(prevGameState => ({
-                ...prevGameState,
-                isGameOver: true
-            }))
-
-            stopAnimation()
-
         }
 
         setBoard(clearedBoard);
 
         spawnNextPiece();
 
-    }, [currentPiece, board, spawnNextPiece, stopAnimation]);
+    }, [currentPiece, board, spawnNextPiece]);
 
     const gameLoop = useCallback(() => {
         setTick(prevTick => prevTick + 1);
