@@ -25,8 +25,14 @@ export type UserInputType = {
 
 export type UserDataType = {
   username: string,
-  score: number,
-  image_path: string
+  highScore: number,
+  imagePath: string,
+  level: number,
+  xp: number,
+  limitXp: number,
+  averageScore: number,
+  totalLinesCleared: number,
+  totalGames: number
 }
 
 export type PieceBagType = 'I'|'O'|'J'|'L'|'T'|'S'|'Z'

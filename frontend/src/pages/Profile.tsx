@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
-import {UserDataType} from "../types"
+import { useContext, useEffect } from "react"
+import { UserDataType } from "../types"
 import { getUserData } from "../services/user"
+import { UserContext } from "../context/UserContext"
 
 const Profile = () => {
 
-  const [userData, setUserData] = useState<UserDataType>()
+  const {setUserData, userData} = useContext(UserContext)
 
   useEffect(() => {
 
@@ -22,14 +23,14 @@ const Profile = () => {
 
   return (
     <div>
-      <img src={userData?.image_path} alt={userData?.username+"_img"} />
+      <img src={userData?.imagePath} alt={userData?.username+"_img"} />
       <h2>{userData?.username} <button>change username</button></h2>
-      <p>Level: 2</p>
-      <p>XP: 30/100</p>
-      <p>High score: {userData?.score}</p>
-      <p>Average score: 1000</p>
-      <p>Total lines cleared: 34</p>
-      <p>Games played: 9</p>
+      <p>Level: {userData?.level}</p>
+      <p>XP: {userData?.xp} / {userData?.limitXp}</p>
+      <p>High score: {userData?.highScore}</p>
+      <p>Average score: {userData?.averageScore}</p>
+      <p>Total lines cleared: {userData?.totalLinesCleared}</p>
+      <p>Games played: {userData?.totalGames}</p>
       <button>change password</button>
       <button>delete account</button>
     </div>
