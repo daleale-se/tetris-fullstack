@@ -1,36 +1,24 @@
-import { useEffect, useState } from "react"
+import { useContext, useState } from "react"
 import { Link } from "react-router-dom"
 import AuthForm from "../components/AuthForm"
-import { INITIAL_USER_FORM, INITIAL_USER_INFO } from "../constants"
+import { GUEST_USER, INITIAL_FORM_MODAL } from "../constants"
+import { UserContext } from "../context/UserContext"
 
 const Home = () => {
 
-    const [userInfo, setUserInfo] = useState(INITIAL_USER_INFO)
-    const [userForm, setUserForm] = useState(INITIAL_USER_FORM)
+    const {setUserData, userData} = useContext(UserContext)
 
-    useEffect(() => {
-
-        const username = sessionStorage.getItem("username")
-        const token = sessionStorage.getItem("token")
-
-        if (username && token) {
-            setUserInfo({
-                username,
-                token,
-            })
-        }
-
-    }, [])
+    const [formModal, setFormModal] = useState(INITIAL_FORM_MODAL)
 
     const handleRegisterButton = () => {
-        setUserForm({
+        setFormModal({
             mode: "register",
             isOpen: true,
         })
     }
 
     const handleLoginButton = () => {
-        setUserForm({
+        setFormModal({
             mode: "login",
             isOpen: true,
         })
@@ -38,7 +26,7 @@ const Home = () => {
 
     const handleLogoutButton = () => {
         sessionStorage.clear()
-        setUserInfo(INITIAL_USER_INFO)
+        setUserData(GUEST_USER)
     }
 
   return (
@@ -48,9 +36,9 @@ const Home = () => {
         <Link to="/dashboard">dashboard</Link>
         <br />
         {
-            userInfo.username
+            userData
             ? <div>
-                <Link to="/profile">{userInfo.username}</Link>
+                <Link to="/profile">{userData.username}</Link>
                 <button onClick={handleLogoutButton}>logout</button>
             </div>
             : <div>
@@ -59,11 +47,10 @@ const Home = () => {
             </div>
         }
         {
-            userForm.isOpen 
+            formModal.isOpen 
             ? <AuthForm 
-                setUserInfo={setUserInfo} 
-                setUserForm={setUserForm} 
-                userForm={userForm}/> 
+                setFormModal={setFormModal} 
+                formModal={formModal}/> 
             : null
         }
     </div>

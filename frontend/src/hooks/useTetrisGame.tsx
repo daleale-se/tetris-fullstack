@@ -17,6 +17,8 @@ export function useTetrisGame() {
     
     const animationInterval = useRef<number | null>(null);
     const dropFrameInterval = useRef<number>(Math.round(DIFFICULTIES[gameState.difficulty] / (1000 / FPS))); 
+    
+    const {setUserData} = useContext(UserContext)
 
     const isPlaying = () => !gameState.isGameOver && !gameState.isGamePaused;
 
@@ -121,8 +123,6 @@ export function useTetrisGame() {
 
     }, []);
 
-    const {setUserData} = useContext(UserContext)
-
     const spawnNextPiece = useCallback(async () => {
         const newPiece = initialPieceState(nextPieces[0]);
 
@@ -151,8 +151,7 @@ export function useTetrisGame() {
         setNextPieces([...rest, randomPiece()]);
 
     }, [nextPieces, board, stopAnimation, gameState.score, gameState.linesCleared, setUserData]);
-
-    
+  
     const lockPiece = useCallback(() => {
         
         const newBoard = insertPieceToBoard(currentPiece, board);
@@ -235,13 +234,11 @@ export function useTetrisGame() {
 
     }, [startAnimation, stopAnimation]);
 
-
     useEffect(() => {
 
         dropFrameInterval.current = Math.round(DIFFICULTIES[gameState.difficulty] / (1000 / FPS));
         
-    }, [gameState.difficulty]);
-    
+    }, [gameState.difficulty]);    
 
     return {
       gameState,

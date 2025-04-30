@@ -15,7 +15,7 @@ const Dashboard = () => {
     fetchSortUsers()
   }, [])
 
-  const handleSelect = (e) => {
+  const handleSelect = (e:React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSortBy(value);
   
@@ -36,9 +36,9 @@ const Dashboard = () => {
       <h1>Dashboard</h1>
       <div>
         
-          <label htmlFor="">
+          <label>
             <span>sorted by</span>
-            <select defaultValue={sortBy} onChange={handleSelect}>
+            <select defaultValue={sortBy} name="sort-by" onChange={handleSelect}>
               <option value="high-score">high score</option>
               <option value="level">level</option>
             </select>

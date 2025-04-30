@@ -22,13 +22,19 @@ const Game = () => {
             <p>difficulty: {gameState.difficulty}</p>
           </div>
 
-          <div className="user-info">
-            <p>
-              <span>{userData?.username}</span>
-              <span>({userData?.level})</span>
-            </p>
-            <p>xp: {userData?.xp} / {userData?.limitXp}</p>
-          </div>
+          {
+            userData 
+            ? <div className="user-info">
+                <p>
+                  <span>{userData?.username}</span>
+                  <span>({userData?.level})</span>
+                </p>
+                <p>xp: {userData?.xp} / {userData?.limitXp}</p>
+              </div>
+            : <div>
+                <p>playing as guest</p>
+              </div>
+          }
 
           <div className="game-controls" style={{display:"flex", flexDirection:"column"}}>
             <button>help</button>

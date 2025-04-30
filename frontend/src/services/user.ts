@@ -23,3 +23,15 @@ export const updateUserStats = async (token:string, payload): Promise<UserDataTy
     const userData = await response.json()
     return userData
 }
+
+export const fetchUser = async (setUserData) => {
+
+  const token = sessionStorage.getItem("token")
+
+  if (token) {
+    const usersData: UserDataType = await getUserData(token)
+    setUserData(usersData)
+  }
+  
+}
+

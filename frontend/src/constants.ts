@@ -1,4 +1,4 @@
-import { UserInfoType, UserFormType, UserInputType, PieceBagType, GameStateType, Difficulty } from "./types"
+import { FormModalType, FormInputType, PieceBagType, GameStateType, Difficulty } from "./types"
 
 export const BOARD_WIDTH = 10
 export const BOARD_HEIGHT = 20
@@ -57,17 +57,14 @@ export const PIECES_COLORS = {
     Z: "cyan"
 }
 
-export const INITIAL_USER_INFO: UserInfoType = {
-    username: "",
-    token: ""
-}
-
-export const INITIAL_USER_FORM: UserFormType = {
+export const INITIAL_FORM_MODAL: FormModalType = {
     mode: null,
     isOpen: false
 }
 
-export const INITIAL_USER_DATA: UserInputType = {
+export const INITIAL_FORM_INPUT: FormInputType = {
     username: "",
     password: ""
 }
+
+export const GUEST_USER = null

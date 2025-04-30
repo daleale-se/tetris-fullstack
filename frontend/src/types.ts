@@ -1,24 +1,18 @@
-export type UserInfoType = {
-    username: string,
-    token: string
-}
+export type RegisterUserType = (data: FormInputType) => void
 
-export type RegisterUserType = (data: UserInputType) => void
+export type LoginUserType = (data: FormInputType) => void
 
-export type LoginUserType = (data: UserInputType, setUserInfo: React.Dispatch<React.SetStateAction<UserInfoType>>) => void
-
-export type UserFormType = {
+export type FormModalType = {
     mode: "register" | "login" | null,
     isOpen: boolean
 }
 
 export type AuthFormType = {
-    setUserInfo: React.Dispatch<React.SetStateAction<UserInfoType>>, 
-    setUserForm: React.Dispatch<React.SetStateAction<UserFormType>>, 
-    userForm: UserFormType
+    setFormModal: React.Dispatch<React.SetStateAction<FormModalType>>, 
+    formModal: FormModalType
 }
 
-export type UserInputType = {
+export type FormInputType = {
     username: string,
     password: string
 }

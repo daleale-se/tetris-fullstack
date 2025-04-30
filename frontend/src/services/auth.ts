@@ -12,7 +12,7 @@ const registerUser: RegisterUserType = (data) => {
     .then(data => console.log(data))
 }
 
-const loginUser: LoginUserType = (data, setUserInfo) => {
+const loginUser: LoginUserType = (data) => {
     fetch(`http://localhost:5000/auth/login`, {
         method: "POST",
         body: JSON.stringify(data),
@@ -22,11 +22,6 @@ const loginUser: LoginUserType = (data, setUserInfo) => {
     })
     .then(res => res.json())
     .then(data => {
-        setUserInfo({
-            username: data["username"],
-            token: data["token"]
-        })
-        sessionStorage.setItem("username", data["username"])
         sessionStorage.setItem("token", data["token"])
     })
 }
