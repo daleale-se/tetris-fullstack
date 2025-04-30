@@ -23,7 +23,13 @@ def register():
     user_id = mongo.db.users.insert_one(
         {"username": username,
          "password": hashed_password,
-         "score": 0}).inserted_id
+         "highScore": 0,
+         "totalLinesCleared": 0,
+         "totalGames": 0,
+         "averageScore": 0,
+         "level": 0,
+         "xp": 0
+         }).inserted_id
         
     image_path = copy_default_image(user_id)
     
