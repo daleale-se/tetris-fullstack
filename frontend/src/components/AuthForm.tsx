@@ -20,18 +20,28 @@ const AuthForm: FC<AuthFormType> = ({setFormModal, formModal}) => {
         }))
     }
 
-    const handleSubmit = (e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const handleSubmit = async (e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault()
 
-        if (formModal.mode === "login") {
-            loginUser(formInput)
-            fetchUser(setUserData)
-        } else if (formModal.mode === "register") {
-            registerUser(formInput)
+        try {
+            
+            if (formModal.mode === "login") {
+                await loginUser(formInput);        
+                await fetchUser(setUserData);
+            } else {
+                await registerUser(formInput);
+            }
+            
+            setFormInput(INITIAL_FORM_INPUT);
+            setFormModal(INITIAL_FORM_MODAL);
+
+        } catch (err) {
+
+            console.error(err);
+            alert(err.message);
+          
         }
         
-        setFormInput(INITIAL_FORM_INPUT)
-        setFormModal(INITIAL_FORM_MODAL)
     }
 
   return (
@@ -47,7 +57,7 @@ const AuthForm: FC<AuthFormType> = ({setFormModal, formModal}) => {
                     type="text" 
                     name="username" 
                     id="username" 
-                    onChange={handleInput} 
+                    onChange={handleInput}
                     required/>
             </label>
             <label htmlFor="password">

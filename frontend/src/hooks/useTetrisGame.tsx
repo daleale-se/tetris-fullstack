@@ -50,7 +50,7 @@ export function useTetrisGame() {
 
     const softDrop = () => {
         
-        if (!collideOnTheBottom(currentPiece, board)){
+        if (!collideOnTheBottom(currentPiece, board) && isPlaying()){
             drop()
         }
 
