@@ -169,3 +169,39 @@ def test_user_increase_his_average_score(client):
     assert data["averageScore"] == 800
     assert data["highScore"] == 1000
     assert data["totalGames"] == 2
+
+def test_user_stats_are_updated_correctly_after_playing_two_games(client):
+    client.post("/auth/register", json={
+        "username": "testuser",
+        "password": "testpassword"
+    })
+
+    response_login = client.post("/auth/login", json={
+        "username": "testuser",
+        "password": "testpassword"
+    })
+    
+    token = response_login.get_json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    client.put("/users/update-stats", headers=headers, json={
+        "score": 1000,
+        "linesCleared": 10,
+        "xpGained": 120
+    })
+
+    response_update = client.put("/users/update-stats", headers=headers, json={
+        "score": 1400,
+        "linesCleared": 16,
+        "xpGained": 230
+    })
+    
+    data = response_update.get_json()
+
+    assert response_update.status_code == 200
+    assert data["averageScore"] == 1200
+    assert data["highScore"] == 1400
+    assert data["level"] == 2
+    assert data["xp"] == 50
+    assert data["totalGames"] == 2
+    assert data["totalLinesCleared"] == 26
