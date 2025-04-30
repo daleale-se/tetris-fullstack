@@ -1,4 +1,4 @@
-import { UserInfoType, UserFormType, UserInputType, PieceBagType, GameStateType, Difficulty } from "./types"
+import { FormModalType, FormInputType, PieceBagType, GameStateType, Difficulty } from "./types"
 
 export const BOARD_WIDTH = 10
 export const BOARD_HEIGHT = 20
@@ -19,19 +19,27 @@ export const PIECES_SHAPES = {
 export const BLOCK_SIZE = 20;
 
 export const DIFFICULTY_THRESHOLDS = [
-    { score: 8000, difficulty: Difficulty.IMPOSSIBLE },
+    { score: 6000, difficulty: Difficulty.IMPOSSIBLE },
     { score: 3000, difficulty: Difficulty.VERY_HARD },
-    { score: 1000, difficulty: Difficulty.HARD },
+    { score: 1500, difficulty: Difficulty.HARD },
     { score: 500, difficulty: Difficulty.NORMAL },
     { score: 0, difficulty: Difficulty.EASY }
 ];
 
 export const DIFFICULTIES = {
-    [Difficulty.EASY]: 500,
-    [Difficulty.NORMAL]: 300,
-    [Difficulty.HARD]: 200,
-    [Difficulty.VERY_HARD]: 100,
-    [Difficulty.IMPOSSIBLE]: 80
+    [Difficulty.EASY]: 700,
+    [Difficulty.NORMAL]: 500,
+    [Difficulty.HARD]: 350,
+    [Difficulty.VERY_HARD]: 225,
+    [Difficulty.IMPOSSIBLE]: 100
+}
+
+export const XP_BY_DIFFICULTY = {
+    [Difficulty.EASY]: 20,
+    [Difficulty.NORMAL]: 40,
+    [Difficulty.HARD]: 100,
+    [Difficulty.VERY_HARD]: 220,
+    [Difficulty.IMPOSSIBLE]: 500
 }
 
 export const FPS = 60;
@@ -57,17 +65,14 @@ export const PIECES_COLORS = {
     Z: "cyan"
 }
 
-export const INITIAL_USER_INFO: UserInfoType = {
-    username: "",
-    token: ""
-}
-
-export const INITIAL_USER_FORM: UserFormType = {
+export const INITIAL_FORM_MODAL: FormModalType = {
     mode: null,
     isOpen: false
 }
 
-export const INITIAL_USER_DATA: UserInputType = {
+export const INITIAL_FORM_INPUT: FormInputType = {
     username: "",
     password: ""
 }
+
+export const GUEST_USER = null

@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {canMoveExcessToLeft, collideOnTheBottom, collideOnTheRight, collideOnTheLeft, createEmptyBoard, getRightOverflow, initialPieceState, insertPieceToBoard, randomPiece, removeCompletedRows, rotateShapeToLeft, pieceFitInTheBoard, getDifficulty } from "../utils/tetrisLogic";
 import { PieceBagType, PieceType } from "../types";
-import { DIFFICULTIES, FPS, INITIAL_GAME_STATE, SCORE } from "../constants";
+import { DIFFICULTIES, FPS, INITIAL_GAME_STATE, SCORE, XP_BY_DIFFICULTY } from "../constants";
+import { UserContext } from "../context/UserContext";
+import { updateUserStats } from "../services/user";
 
 export function useTetrisGame() {
 
@@ -15,6 +17,8 @@ export function useTetrisGame() {
     
     const animationInterval = useRef<number | null>(null);
     const dropFrameInterval = useRef<number>(Math.round(DIFFICULTIES[gameState.difficulty] / (1000 / FPS))); 
+    
+    const {setUserData} = useContext(UserContext)
 
     const isPlaying = () => !gameState.isGameOver && !gameState.isGamePaused;
 
@@ -46,7 +50,7 @@ export function useTetrisGame() {
 
     const softDrop = () => {
         
-        if (!collideOnTheBottom(currentPiece, board)){
+        if (!collideOnTheBottom(currentPiece, board) && isPlaying()){
             drop()
         }
 
@@ -110,21 +114,6 @@ export function useTetrisGame() {
     
     }
 
-    const spawnNextPiece = useCallback(() => {
-        const newPiece = initialPieceState(nextPieces[0]);
-
-        if (collideOnTheBottom(newPiece, board)) {
-            setGameState(prev => ({ ...prev, isGameOver: true }));
-            return;
-        }
-
-        setCurrentPiece(newPiece);
-
-        const [, ...rest] = nextPieces;
-        setNextPieces([...rest, randomPiece()]);
-
-    }, [nextPieces, board]);
-
     const stopAnimation = useCallback(() => {
 
         if (animationInterval.current) {
@@ -134,14 +123,41 @@ export function useTetrisGame() {
 
     }, []);
 
-    
+    const spawnNextPiece = useCallback(async () => {
+        const newPiece = initialPieceState(nextPieces[0]);
+
+        if (collideOnTheBottom(newPiece, board)) {
+            setGameState(prev => ({ ...prev, isGameOver: true }));
+
+            const token = sessionStorage.getItem("token")
+            if (token) {
+                const payload = {
+                    score: gameState.score,
+                    linesCleared: gameState.linesCleared,
+                    xpGained: XP_BY_DIFFICULTY[gameState.difficulty] + gameState.linesCleared
+                }
+                const updatedUserData = await updateUserStats(token, payload)
+                setUserData(updatedUserData)
+            }
+
+            stopAnimation()
+
+            return;
+        }
+
+        setCurrentPiece(newPiece);
+
+        const [, ...rest] = nextPieces;
+        setNextPieces([...rest, randomPiece()]);
+
+    }, [nextPieces, board, stopAnimation, gameState.score, gameState.linesCleared, gameState.difficulty, setUserData]);
+  
     const lockPiece = useCallback(() => {
         
         const newBoard = insertPieceToBoard(currentPiece, board);
         const {board: clearedBoard, completedRows} = removeCompletedRows(newBoard);
 
         if (pieceFitInTheBoard(currentPiece)) {
-
 
             setGameState(prevGameState => {
 
@@ -155,22 +171,13 @@ export function useTetrisGame() {
                 }
             })
 
-        } else {
-
-            setGameState(prevGameState => ({
-                ...prevGameState,
-                isGameOver: true
-            }))
-
-            stopAnimation()
-
         }
 
         setBoard(clearedBoard);
 
         spawnNextPiece();
 
-    }, [currentPiece, board, spawnNextPiece, stopAnimation]);
+    }, [currentPiece, board, spawnNextPiece]);
 
     const gameLoop = useCallback(() => {
         setTick(prevTick => prevTick + 1);
@@ -217,13 +224,11 @@ export function useTetrisGame() {
 
     }, [startAnimation, stopAnimation]);
 
-
     useEffect(() => {
 
         dropFrameInterval.current = Math.round(DIFFICULTIES[gameState.difficulty] / (1000 / FPS));
         
-    }, [gameState.difficulty]);
-    
+    }, [gameState.difficulty]);    
 
     return {
       gameState,

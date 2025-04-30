@@ -1,52 +1,77 @@
-import { FC, useState } from "react";
+import { FC, useContext, useState } from "react";
 import {registerUser, loginUser} from "../services/auth"
 import { AuthFormType } from "../types";
-import { INITIAL_USER_DATA, INITIAL_USER_INFO } from "../constants";
+import { INITIAL_FORM_INPUT, INITIAL_FORM_MODAL } from "../constants";
+import { fetchUser } from "../services/user";
+import { UserContext } from "../context/UserContext";
 
 
-const AuthForm: FC<AuthFormType> = ({setUserInfo, setUserForm, userForm}) => {
+const AuthForm: FC<AuthFormType> = ({setFormModal, formModal}) => {
 
-    const [data, setData] = useState(INITIAL_USER_DATA)
-
+    const [formInput, setFormInput] = useState(INITIAL_FORM_INPUT)
+    const { setUserData } = useContext(UserContext)
+    
     const handleInput = (e:React.ChangeEvent<HTMLInputElement>) => {
         const key = e.target.name
 
-        setData(prevData => ({
+        setFormInput(prevData => ({
             ...prevData,
             [key]: e.target.value
         }))
     }
 
-    const handleSubmit = (e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const handleSubmit = async (e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault()
 
-        const actions = {
-            register: () => registerUser(data),
-            login: () => loginUser(data, setUserInfo),
-        }
-    
-        actions[userForm.mode as 'register' | 'login']()
+        try {
+            
+            if (formModal.mode === "login") {
+                await loginUser(formInput);        
+                await fetchUser(setUserData);
+            } else {
+                await registerUser(formInput);
+            }
+            
+            setFormInput(INITIAL_FORM_INPUT);
+            setFormModal(INITIAL_FORM_MODAL);
 
-        setData(INITIAL_USER_DATA)
-        setUserInfo(INITIAL_USER_INFO)
+        } catch (err) {
+
+            console.error(err);
+            alert(err.message);
+          
+        }
+        
     }
 
   return (
     <div>
-        <button onClick={() => setUserForm({...userForm, ["isOpen"] : userForm.isOpen!})}>close</button>
+        <button onClick={() => setFormModal({...formModal, ["isOpen"] : formModal.isOpen!})}>close</button>
         <form>
-            <h2>{userForm.mode}</h2>
+            <h2>{formModal.mode}</h2>
 
             <label htmlFor="username">
                 <p>username:</p>
-                <input value={data["username"]} type="text" name="username" onChange={handleInput} required/>
+                <input 
+                    value={formInput["username"]} 
+                    type="text" 
+                    name="username" 
+                    id="username" 
+                    onChange={handleInput}
+                    required/>
             </label>
             <label htmlFor="password">
                 <p>password:</p>
-                <input value={data["password"]} type="password" name="password" onChange={handleInput} required/>
+                <input 
+                    value={formInput["password"]} 
+                    type="password" 
+                    name="password" 
+                    id="password" 
+                    onChange={handleInput} 
+                    required/>
             </label>
 
-            <button type="submit" onClick={handleSubmit}>{userForm.mode}</button>
+            <button type="submit" onClick={handleSubmit}>{formModal.mode}</button>
         </form>
     </div>
   )

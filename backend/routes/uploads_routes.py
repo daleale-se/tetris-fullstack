@@ -25,7 +25,7 @@ def update_user_image():
         filename = secure_filename(img_file.filename)
         user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
 
-        remove_old_file(user.get("image_path"))
+        remove_old_file(user.get("imagePath"))
 
         extension = filename.rsplit(".", 1)[1].lower()
         new_filename = f"{current_user_id}_profile.{extension}"
@@ -41,7 +41,7 @@ def update_user_image():
 
         mongo.db.users.update_one(
             {"_id": ObjectId(current_user_id)},
-            {"$set": {"image_path": image_path}}
+            {"$set": {"imagePath": image_path}}
             )
 
         return jsonify({"message": "Image updated successfully"}), 200

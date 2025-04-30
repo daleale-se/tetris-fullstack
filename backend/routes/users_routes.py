@@ -57,10 +57,11 @@ def update_stats():
         level = user["level"]
         total_xp = user["xp"]
         
-        current_level, current_xp = add_experience(level, total_xp, xp_gained)
+        current_level, current_xp, limit_xp = add_experience(level, total_xp, xp_gained)
         
         updates["level"] = current_level
         updates["xp"] = current_xp
+        updates["limitXp"] = limit_xp
 
     if score is not None:
         high_score = user.get("highScore", 0)
@@ -69,7 +70,7 @@ def update_stats():
 
         total_games = user.get("totalGames", 0) + 1
         updates["totalGames"] = total_games
-        updates["averageScore"] = (user.get("averageScore", 0) * user.get("totalGames", 0) + score) / total_games
+        updates["averageScore"] = round((user.get("averageScore", 0) * user.get("totalGames", 0) + score) / total_games)
     else:
         updates["totalGames"] = user.get("totalGames") + 1
 
@@ -80,6 +81,7 @@ def update_stats():
 
     user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
     user["_id"] = str(user["_id"])
+    
     return jsonify(user), 200
 
 @users_bp.route("", methods=["DELETE"])
@@ -98,16 +100,14 @@ def remove_user():
     
     return jsonify({"message": "User deleted successfully"}), 200
 
-
 @users_bp.route("/sort", methods=["GET"])
 def get_users_sort_by_score():
-    sorted_users = mongo.db.users.find().sort("score", -1)
+    sorted_users = mongo.db.users.find().sort("highScore", -1)
     return jsonify({"users": sorted_users}), 200
-
 
 @users_bp.route("", methods=["GET"])
 @jwt_required()
 def get_user_data():
     current_user_id = get_jwt_identity()
     user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
-    return jsonify({"user": user}), 200
+    return jsonify(user), 200
