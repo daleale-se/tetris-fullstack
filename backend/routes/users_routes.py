@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from utils import add_experience
 from utils import remove_old_file
 from extensions import mongo, bcrypt
 from bson import ObjectId   # type: ignore
@@ -6,9 +7,9 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 users_bp = Blueprint("users", __name__)
 
-@users_bp.route("", methods=["PUT"])
+@users_bp.route("/update-profile", methods=["PUT"])
 @jwt_required()
-def update_user():
+def update_profile():
     current_user_id = get_jwt_identity()
     
     data = request.get_json()
@@ -16,7 +17,6 @@ def update_user():
     
     new_username = data.get("username")
     new_password = data.get("password")
-    new_score = data.get("score")
     
     user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
     
@@ -29,10 +29,7 @@ def update_user():
     if new_password:
         hashed_password = bcrypt.generate_password_hash(new_password).decode("utf-8")
         updates["password"] = hashed_password
-        
-    if new_score:
-        updates["score"] = new_score
-        
+                
     message = []
     for key in updates:
         message.append(f"{key.capitalize()} updated successfully")
@@ -40,6 +37,50 @@ def update_user():
     mongo.db.users.update_one({"_id": ObjectId(current_user_id)}, {"$set": updates})
     
     return jsonify({"message": message}), 200
+
+@users_bp.route("/update-stats", methods=["PUT"])
+@jwt_required()
+def update_stats():
+    current_user_id = get_jwt_identity()
+
+    data = request.get_json()
+    
+    updates = {}
+    
+    score = data.get("score")
+    lines_cleared = data.get("linesCleared")
+    xp_gained = data.get("xpGained")
+    
+    user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
+
+    if xp_gained:
+        level = user["level"]
+        total_xp = user["xp"]
+        
+        current_level, current_xp = add_experience(level, total_xp, xp_gained)
+        
+        updates["level"] = current_level
+        updates["xp"] = current_xp
+
+    if score is not None:
+        high_score = user.get("highScore", 0)
+        if high_score < score:
+            updates["highScore"] = score
+
+        total_games = user.get("totalGames", 0) + 1
+        updates["totalGames"] = total_games
+        updates["averageScore"] = (user.get("averageScore", 0) * user.get("totalGames", 0) + score) / total_games
+    else:
+        updates["totalGames"] = user.get("totalGames") + 1
+
+    if lines_cleared is not None:
+        updates["totalLinesCleared"] = user.get("totalLinesCleared", 0) + lines_cleared
+            
+    mongo.db.users.update_one({"_id": ObjectId(current_user_id)}, {"$set": updates})
+
+    user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
+    user["_id"] = str(user["_id"])
+    return jsonify(user), 200
 
 @users_bp.route("", methods=["DELETE"])
 @jwt_required()
@@ -57,10 +98,12 @@ def remove_user():
     
     return jsonify({"message": "User deleted successfully"}), 200
 
+
 @users_bp.route("/sort", methods=["GET"])
 def get_users_sort_by_score():
     sorted_users = mongo.db.users.find().sort("score", -1)
     return jsonify({"users": sorted_users}), 200
+
 
 @users_bp.route("", methods=["GET"])
 @jwt_required()
