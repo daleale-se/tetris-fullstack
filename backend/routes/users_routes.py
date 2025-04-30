@@ -57,10 +57,11 @@ def update_stats():
         level = user["level"]
         total_xp = user["xp"]
         
-        current_level, current_xp = add_experience(level, total_xp, xp_gained)
+        current_level, current_xp, limit_xp = add_experience(level, total_xp, xp_gained)
         
         updates["level"] = current_level
         updates["xp"] = current_xp
+        updates["limitXp"] = limit_xp
 
     if score is not None:
         high_score = user.get("highScore", 0)

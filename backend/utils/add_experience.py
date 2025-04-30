@@ -11,5 +11,7 @@ def add_experience(level, xp, gained_xp):
         else:
             xp += gained_xp
             gained_xp = 0
+    
+    limit_xp = EXPERIENCES[level]
             
-    return level, xp
+    return level, xp, limit_xp

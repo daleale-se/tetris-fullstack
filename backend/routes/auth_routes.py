@@ -28,15 +28,15 @@ def register():
          "totalGames": 0,
          "averageScore": 0,
          "level": 0,
-         "xp": 0
+         "xp": 0,
+         "limitXp": 100
          }).inserted_id
         
     image_path = copy_default_image(user_id)
     
     mongo.db.users.update_one(
         {"_id": ObjectId(user_id)},
-        {"$set": {"image_path": image_path}}
-        )
+        {"$set": {"imagePath": image_path}})
 
     return jsonify({"message": "User created successfully", "user_id": str(user_id)}), 201
 
