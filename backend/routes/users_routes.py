@@ -70,7 +70,7 @@ def update_stats():
 
         total_games = user.get("totalGames", 0) + 1
         updates["totalGames"] = total_games
-        updates["averageScore"] = (user.get("averageScore", 0) * user.get("totalGames", 0) + score) / total_games
+        updates["averageScore"] = round((user.get("averageScore", 0) * user.get("totalGames", 0) + score) / total_games)
     else:
         updates["totalGames"] = user.get("totalGames") + 1
 
@@ -100,12 +100,10 @@ def remove_user():
     
     return jsonify({"message": "User deleted successfully"}), 200
 
-
 @users_bp.route("/sort", methods=["GET"])
 def get_users_sort_by_score():
-    sorted_users = mongo.db.users.find().sort("score", -1)
+    sorted_users = mongo.db.users.find().sort("highScore", -1)
     return jsonify({"users": sorted_users}), 200
-
 
 @users_bp.route("", methods=["GET"])
 @jwt_required()
