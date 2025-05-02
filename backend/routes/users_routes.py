@@ -13,9 +13,9 @@ def update_profile():
     current_user_id = get_jwt_identity()
     data = request.get_json()
 
-    old_password = data.get("old_password")
-    new_username = data.get("username")
-    new_password = data.get("password")
+    old_password = data.get("password")
+    new_username = data.get("newUsername")
+    new_password = data.get("newPassword")
 
     user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
 

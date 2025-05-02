@@ -16,12 +16,12 @@ const Profile = () => {
       })
   }
 
-  // const handleChangePassword = () => {
-  //     setFormUserDataModal({
-  //         mode: "password",
-  //         isOpen: true,
-  //     })
-  // }
+  const handleChangePassword = () => {
+      setFormUserDataModal({
+          mode: "password",
+          isOpen: true,
+      })
+  }
 
   return (
     <div>
@@ -45,7 +45,7 @@ const Profile = () => {
         <p>Games played: {userData?.totalGames}</p>
         
         <div>
-          <button>change password</button>
+          <button onClick={handleChangePassword}>change password</button>
           <button>delete account</button>
         </div>
 
