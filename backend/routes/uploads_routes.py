@@ -44,7 +44,7 @@ def update_user_image():
             {"$set": {"imagePath": image_path}}
             )
 
-        return jsonify({"message": "Image updated successfully"}), 200
+        return jsonify({"message": "Image updated successfully", "imagePath": image_path}), 200
 
     return jsonify({"error": "Invalid file"}), 400
 
@@ -55,16 +55,15 @@ def remove_user_image():
     
     user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
 
-    remove_old_file(user.get("image_path"))
+    remove_old_file(user.get("imagePath"))
     
     image_path = copy_default_image(user_id)
     
     mongo.db.users.update_one(
         {"_id": ObjectId(user_id)},
-        {"$set": {"image_path": image_path}}
-        )
+        {"$set": {"imagePath": image_path}})
 
-    return jsonify({"message": "Image deleted successfully"}), 200
+    return jsonify({"message": "Image deleted successfully", "imagePath": image_path}), 200
 
 @uploads_bp.route('/<filename>', methods=["GET"])
 def uploaded_file(filename):

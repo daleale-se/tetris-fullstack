@@ -1,13 +1,17 @@
-import { useContext, useState } from "react"
+import { useContext, useRef, useState } from "react"
 import { UserContext } from "../context/UserContext"
 import FormChangeUserData from "../components/FormChangeUserData"
 
 const Profile = () => {
 
-  const { userData } = useContext(UserContext)
+  const { userData, setUserData } = useContext(UserContext)
 
   const [formUserDataModal, setFormUserDataModal] = useState({mode: "", isOpen: false})
   // const [formDeleteUserModal, setFormDeleteUserModal] = useState()
+
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef(null);
+  const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
 
   const handleChangeUsername = () => {
       setFormUserDataModal({
@@ -23,13 +27,92 @@ const Profile = () => {
       })
   }
 
+  const handleImageButtonClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      setUploadError(`Image size exceeds the limit of ${MAX_IMAGE_SIZE_BYTES / (1024 * 1024)}MB.`);
+      return;
+    }
+
+    setUploadError("");
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const token = sessionStorage.getItem("token")
+
+    try {
+
+      const response = await fetch("http://localhost:5000/uploads", {
+        method: "PUT",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },    
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        await setUserData({ ...userData, imagePath: data.imagePath });
+        alert("Image uploaded successfully!");
+
+      } else {
+
+        console.error("Error uploading image:", response.status);
+        setUploadError("Failed to upload image. Please try again.");
+
+      }
+    } catch (error) {
+
+      console.error("Error uploading image:", error);
+      setUploadError("Failed to upload image. Please check your connection.");
+
+    }
+  };
+
+  const handleRemoveImage = async () => {
+
+    const token = sessionStorage.getItem("token")
+    
+    const response = await fetch("http://localhost:5000/uploads", {
+      method: "DELETE",
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    await setUserData({ ...userData, imagePath: data.imagePath });
+
+  }
+
   return (
     <div>
       <div>
 
         <div>
           <img src={userData?.imagePath} alt={userData?.username+"_img"} width={80}/>
-          <button>change image</button>
+          <button onClick={handleImageButtonClick}>change image</button>
+          <button onClick={handleRemoveImage}>remove image</button>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ display: "none" }}
+            ref={fileInputRef}
+          />
+          {uploadError && <p style={{ color: "red" }}>{uploadError}</p>}
         </div>
 
         <div>
