@@ -109,7 +109,11 @@ const Profile = () => {
         <div>
           <img src={userData?.imagePath} alt={userData?.username+"_img"} width={80}/>
           <button onClick={handleImageButtonClick}>change image</button>
-          <button onClick={handleRemoveImage} >remove image</button>
+          {
+            !userData?.imagePath.includes("default_profile_image.png")
+            ? <button onClick={handleRemoveImage} >remove image</button>
+            : null 
+          }
           <input
             type="file"
             accept="image/*"

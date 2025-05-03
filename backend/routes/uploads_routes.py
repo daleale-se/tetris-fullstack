@@ -25,7 +25,8 @@ def update_user_image():
         filename = secure_filename(img_file.filename)
         user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
 
-        remove_old_file(user.get("imagePath"))
+        if "default_profile_image" not in user.get("imagePath"):
+            remove_old_file(user.get("imagePath"))
 
         extension = filename.rsplit(".", 1)[1].lower()
         new_filename = f"{current_user_id}_profile.{extension}"
@@ -57,7 +58,7 @@ def remove_user_image():
 
     remove_old_file(user.get("imagePath"))
     
-    image_path = copy_default_image(user_id)
+    image_path = copy_default_image()
     
     mongo.db.users.update_one(
         {"_id": ObjectId(user_id)},

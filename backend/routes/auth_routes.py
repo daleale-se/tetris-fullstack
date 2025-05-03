@@ -32,7 +32,7 @@ def register():
          "limitXp": 100
          }).inserted_id
         
-    image_path = copy_default_image(user_id)
+    image_path = copy_default_image()
     
     mongo.db.users.update_one(
         {"_id": ObjectId(user_id)},
