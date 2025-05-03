@@ -1,13 +1,14 @@
 import { useContext, useRef, useState } from "react"
 import { UserContext } from "../context/UserContext"
 import FormChangeUserData from "../components/FormChangeUserData"
+import DeleteUserModal from "../components/DeleteUserModal"
 
 const Profile = () => {
 
   const { userData, setUserData } = useContext(UserContext)
 
   const [formUserDataModal, setFormUserDataModal] = useState({mode: "", isOpen: false})
-  // const [formDeleteUserModal, setFormDeleteUserModal] = useState()
+  const [deleteUserModalIsOpen, setDeleteUserModalIsOpen] = useState(false)
 
   const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef(null);
@@ -97,6 +98,10 @@ const Profile = () => {
 
   }
 
+  const handleRemoveUser = () => {
+    setDeleteUserModalIsOpen(true)
+  }
+
   return (
     <div>
       <div>
@@ -104,7 +109,7 @@ const Profile = () => {
         <div>
           <img src={userData?.imagePath} alt={userData?.username+"_img"} width={80}/>
           <button onClick={handleImageButtonClick}>change image</button>
-          <button onClick={handleRemoveImage}>remove image</button>
+          <button onClick={handleRemoveImage} >remove image</button>
           <input
             type="file"
             accept="image/*"
@@ -129,7 +134,7 @@ const Profile = () => {
         
         <div>
           <button onClick={handleChangePassword}>change password</button>
-          <button>delete account</button>
+          <button onClick={handleRemoveUser}>delete account</button>
         </div>
 
       </div>
@@ -142,7 +147,13 @@ const Profile = () => {
           />
         : null
       }
-      
+      {
+        deleteUserModalIsOpen 
+        ? <DeleteUserModal 
+          setDeleteUserModalIsOpen={setDeleteUserModalIsOpen}
+          />
+        : null
+      }
 
     </div>
   )

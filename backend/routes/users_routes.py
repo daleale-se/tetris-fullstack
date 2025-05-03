@@ -108,7 +108,7 @@ def remove_user():
     if not user:
         return jsonify({"error": "User not found"}), 200
     
-    remove_old_file(user.get("image_path"))
+    remove_old_file(user.get("imagePath"))
     
     mongo.db.users.delete_one({"_id": ObjectId(current_user_id)})
     
