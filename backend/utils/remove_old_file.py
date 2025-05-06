@@ -2,7 +2,6 @@ import os
 from flask import current_app
 
 def remove_old_file(path):
-    print(path)
     old_filepath = path.split("/")
     old_image_path = os.path.join("uploads", old_filepath[-1])
     if old_image_path:

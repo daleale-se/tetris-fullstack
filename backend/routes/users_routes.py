@@ -11,32 +11,46 @@ users_bp = Blueprint("users", __name__)
 @jwt_required()
 def update_profile():
     current_user_id = get_jwt_identity()
-    
     data = request.get_json()
-    updates = {}
-    
-    new_username = data.get("username")
-    new_password = data.get("password")
-    
+
+    old_password = data.get("password")
+    new_username = data.get("newUsername")
+    new_password = data.get("newPassword")
+
     user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
-    
+
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    if new_username:
+    # Require old password if changing username or password
+    if (new_password or new_username) and not old_password:
+        return jsonify({"error": "Old password is required"}), 400
+
+    # Verify old password
+    if not bcrypt.check_password_hash(user["password"], old_password):
+        return jsonify({"error": "Old password is incorrect"}), 403
+
+    updates = {}
+
+    # Check if username is already taken by another user
+    if new_username and new_username != user["username"]:
+        if mongo.db.users.find_one({"username": new_username}):
+            return jsonify({"error": "Username already exists"}), 409
         updates["username"] = new_username
-    
+
+    # If new password provided
     if new_password:
         hashed_password = bcrypt.generate_password_hash(new_password).decode("utf-8")
         updates["password"] = hashed_password
-                
-    message = []
-    for key in updates:
-        message.append(f"{key.capitalize()} updated successfully")
 
-    mongo.db.users.update_one({"_id": ObjectId(current_user_id)}, {"$set": updates})
+    if updates:
+        mongo.db.users.update_one({"_id": ObjectId(current_user_id)}, {"$set": updates})
+
+    message = [f"{key.capitalize()} updated successfully" for key in updates]
+
+    user = mongo.db.users.find_one({"_id": ObjectId(current_user_id)})
     
-    return jsonify({"message": message}), 200
+    return jsonify({"message": message, "user": user}), 200
 
 @users_bp.route("/update-stats", methods=["PUT"])
 @jwt_required()
@@ -94,7 +108,7 @@ def remove_user():
     if not user:
         return jsonify({"error": "User not found"}), 200
     
-    remove_old_file(user.get("image_path"))
+    remove_old_file(user.get("imagePath"))
     
     mongo.db.users.delete_one({"_id": ObjectId(current_user_id)})
     
